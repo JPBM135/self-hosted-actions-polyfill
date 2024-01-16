@@ -17,38 +17,11 @@ jobs:
           fetch-tags: true
           ref: ${{ github.ref }}
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn --immutable
-
-      - name: Build
-        run: yarn build
-
-      - name: Set up git user
-        run: |
-          git config --local user.email "jpedrobm0@gmail.com"
-          git config --local user.name "JPBM135"
-
       - name: Get commits
         id: get_commits
         run: |
-          echo "commits=$( git log --pretty=format:"%s (%an)" $(git describe --tags --abbrev=0 @^)..@ | tr "\n" "," | sed "s/,$//")" >> $GITHUB_OUTPUT
+          echo "commits=$( git log --pretty=format:"%s (%an)" $(git describe --tags --abbrev=0 @^)..@ | sed "s/,$//")" >> $GITHUB_OUTPUT
         shell: bash
-
-      - name: Commit changes
-        run: |
-          git pull origin ${{ github.ref }}
-          git add --all
-          git commit -m "Release ${{ github.ref }}"
-          git tag ${{ github.ref }} -m "Release ${{ github.ref }}"
-          git push origin main --follow-tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         id: create_release
