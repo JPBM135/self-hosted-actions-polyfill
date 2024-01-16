@@ -46,7 +46,7 @@ jobs:
           git add --all
           git commit -m "Release ${{ github.ref }}"
           git tag ${{ github.ref }} -m "Release ${{ github.ref }}"
-          git push origin ${{ github.ref }} --follow-tags
+          git push --follow-tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
