@@ -730,7 +730,7 @@ var require_tunnel = __commonJS({
         connectOptions.headers = connectOptions.headers || {};
         connectOptions.headers["Proxy-Authorization"] = "Basic " + new Buffer(connectOptions.proxyAuth).toString("base64");
       }
-      debug4("making CONNECT request");
+      debug2("making CONNECT request");
       var connectReq = self.request(connectOptions);
       connectReq.useChunkedEncodingByDefault = false;
       connectReq.once("response", onResponse);
@@ -750,7 +750,7 @@ var require_tunnel = __commonJS({
         connectReq.removeAllListeners();
         socket.removeAllListeners();
         if (res.statusCode !== 200) {
-          debug4(
+          debug2(
             "tunneling socket could not be established, statusCode=%d",
             res.statusCode
           );
@@ -762,7 +762,7 @@ var require_tunnel = __commonJS({
           return;
         }
         if (head.length > 0) {
-          debug4("got illegal response body from proxy");
+          debug2("got illegal response body from proxy");
           socket.destroy();
           var error = new Error("got illegal response body from proxy");
           error.code = "ECONNRESET";
@@ -770,13 +770,13 @@ var require_tunnel = __commonJS({
           self.removeSocket(placeholder);
           return;
         }
-        debug4("tunneling connection has established");
+        debug2("tunneling connection has established");
         self.sockets[self.sockets.indexOf(placeholder)] = socket;
         return cb(socket);
       }
       function onError(cause) {
         connectReq.removeAllListeners();
-        debug4(
+        debug2(
           "tunneling socket could not be established, cause=%s\n",
           cause.message,
           cause.stack
@@ -838,9 +838,9 @@ var require_tunnel = __commonJS({
       }
       return target;
     }
-    var debug4;
+    var debug2;
     if (process.env.NODE_DEBUG && /\btunnel\b/.test(process.env.NODE_DEBUG)) {
-      debug4 = function() {
+      debug2 = function() {
         var args = Array.prototype.slice.call(arguments);
         if (typeof args[0] === "string") {
           args[0] = "TUNNEL: " + args[0];
@@ -850,10 +850,10 @@ var require_tunnel = __commonJS({
         console.error.apply(console, args);
       };
     } else {
-      debug4 = function() {
+      debug2 = function() {
       };
     }
-    exports.debug = debug4;
+    exports.debug = debug2;
   }
 });
 
@@ -17761,12 +17761,12 @@ var require_lib = __commonJS({
             throw new Error("Client has already been disposed.");
           }
           const parsedUrl = new URL(requestUrl);
-          let info3 = this._prepareRequest(verb, parsedUrl, headers);
+          let info2 = this._prepareRequest(verb, parsedUrl, headers);
           const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb) ? this._maxRetries + 1 : 1;
           let numTries = 0;
           let response;
           do {
-            response = yield this.requestRaw(info3, data);
+            response = yield this.requestRaw(info2, data);
             if (response && response.message && response.message.statusCode === HttpCodes.Unauthorized) {
               let authenticationHandler;
               for (const handler of this.handlers) {
@@ -17776,7 +17776,7 @@ var require_lib = __commonJS({
                 }
               }
               if (authenticationHandler) {
-                return authenticationHandler.handleAuthentication(this, info3, data);
+                return authenticationHandler.handleAuthentication(this, info2, data);
               } else {
                 return response;
               }
@@ -17799,8 +17799,8 @@ var require_lib = __commonJS({
                   }
                 }
               }
-              info3 = this._prepareRequest(verb, parsedRedirectUrl, headers);
-              response = yield this.requestRaw(info3, data);
+              info2 = this._prepareRequest(verb, parsedRedirectUrl, headers);
+              response = yield this.requestRaw(info2, data);
               redirectsRemaining--;
             }
             if (!response.message.statusCode || !HttpResponseRetryCodes.includes(response.message.statusCode)) {
@@ -17829,7 +17829,7 @@ var require_lib = __commonJS({
        * @param info
        * @param data
        */
-      requestRaw(info3, data) {
+      requestRaw(info2, data) {
         return __awaiter(this, void 0, void 0, function* () {
           return new Promise((resolve, reject) => {
             function callbackForResult(err, res) {
@@ -17841,7 +17841,7 @@ var require_lib = __commonJS({
                 resolve(res);
               }
             }
-            this.requestRawWithCallback(info3, data, callbackForResult);
+            this.requestRawWithCallback(info2, data, callbackForResult);
           });
         });
       }
@@ -17851,12 +17851,12 @@ var require_lib = __commonJS({
        * @param data
        * @param onResult
        */
-      requestRawWithCallback(info3, data, onResult) {
+      requestRawWithCallback(info2, data, onResult) {
         if (typeof data === "string") {
-          if (!info3.options.headers) {
-            info3.options.headers = {};
+          if (!info2.options.headers) {
+            info2.options.headers = {};
           }
-          info3.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
+          info2.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
         }
         let callbackCalled = false;
         function handleResult(err, res) {
@@ -17865,7 +17865,7 @@ var require_lib = __commonJS({
             onResult(err, res);
           }
         }
-        const req = info3.httpModule.request(info3.options, (msg) => {
+        const req = info2.httpModule.request(info2.options, (msg) => {
           const res = new HttpClientResponse(msg);
           handleResult(void 0, res);
         });
@@ -17877,7 +17877,7 @@ var require_lib = __commonJS({
           if (socket) {
             socket.end();
           }
-          handleResult(new Error(`Request timeout: ${info3.options.path}`));
+          handleResult(new Error(`Request timeout: ${info2.options.path}`));
         });
         req.on("error", function(err) {
           handleResult(err);
@@ -17913,27 +17913,27 @@ var require_lib = __commonJS({
         return this._getProxyAgentDispatcher(parsedUrl, proxyUrl);
       }
       _prepareRequest(method, requestUrl, headers) {
-        const info3 = {};
-        info3.parsedUrl = requestUrl;
-        const usingSsl = info3.parsedUrl.protocol === "https:";
-        info3.httpModule = usingSsl ? https : http;
+        const info2 = {};
+        info2.parsedUrl = requestUrl;
+        const usingSsl = info2.parsedUrl.protocol === "https:";
+        info2.httpModule = usingSsl ? https : http;
         const defaultPort = usingSsl ? 443 : 80;
-        info3.options = {};
-        info3.options.host = info3.parsedUrl.hostname;
-        info3.options.port = info3.parsedUrl.port ? parseInt(info3.parsedUrl.port) : defaultPort;
-        info3.options.path = (info3.parsedUrl.pathname || "") + (info3.parsedUrl.search || "");
-        info3.options.method = method;
-        info3.options.headers = this._mergeHeaders(headers);
+        info2.options = {};
+        info2.options.host = info2.parsedUrl.hostname;
+        info2.options.port = info2.parsedUrl.port ? parseInt(info2.parsedUrl.port) : defaultPort;
+        info2.options.path = (info2.parsedUrl.pathname || "") + (info2.parsedUrl.search || "");
+        info2.options.method = method;
+        info2.options.headers = this._mergeHeaders(headers);
         if (this.userAgent != null) {
-          info3.options.headers["user-agent"] = this.userAgent;
+          info2.options.headers["user-agent"] = this.userAgent;
         }
-        info3.options.agent = this._getAgent(info3.parsedUrl);
+        info2.options.agent = this._getAgent(info2.parsedUrl);
         if (this.handlers) {
           for (const handler of this.handlers) {
-            handler.prepareRequest(info3.options);
+            handler.prepareRequest(info2.options);
           }
         }
-        return info3;
+        return info2;
       }
       _mergeHeaders(headers) {
         if (this.requestOptions && this.requestOptions.headers) {
@@ -18718,7 +18718,7 @@ var require_core = __commonJS({
       command_1.issueCommand("add-mask", {}, secret);
     }
     exports.setSecret = setSecret;
-    function addPath2(inputPath) {
+    function addPath(inputPath) {
       const filePath = process.env["GITHUB_PATH"] || "";
       if (filePath) {
         file_command_1.issueFileCommand("PATH", inputPath);
@@ -18727,7 +18727,7 @@ var require_core = __commonJS({
       }
       process.env["PATH"] = `${inputPath}${path.delimiter}${process.env["PATH"]}`;
     }
-    exports.addPath = addPath2;
+    exports.addPath = addPath;
     function getInput2(name, options) {
       const val = process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] || "";
       if (options && options.required && !val) {
@@ -18772,19 +18772,19 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       command_1.issue("echo", enabled ? "on" : "off");
     }
     exports.setCommandEcho = setCommandEcho;
-    function setFailed3(message) {
+    function setFailed2(message) {
       process.exitCode = ExitCode.Failure;
       error(message);
     }
-    exports.setFailed = setFailed3;
+    exports.setFailed = setFailed2;
     function isDebug() {
       return process.env["RUNNER_DEBUG"] === "1";
     }
     exports.isDebug = isDebug;
-    function debug4(message) {
+    function debug2(message) {
       command_1.issueCommand("debug", {}, message);
     }
-    exports.debug = debug4;
+    exports.debug = debug2;
     function error(message, properties = {}) {
       command_1.issueCommand("error", utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
     }
@@ -18797,10 +18797,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       command_1.issueCommand("notice", utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
     }
     exports.notice = notice;
-    function info3(message) {
+    function info2(message) {
       process.stdout.write(message + os.EOL);
     }
-    exports.info = info3;
+    exports.info = info2;
     function startGroup(name) {
       command_1.issue("group", name);
     }
@@ -19894,79 +19894,61 @@ var require_exec = __commonJS({
 });
 
 // src/index.ts
-var core3 = __toESM(require_core(), 1);
-import process2 from "node:process";
-
-// src/polyfills/yarn.ts
-var core2 = __toESM(require_core(), 1);
-var exec = __toESM(require_exec(), 1);
-
-// src/utils/execCatch.ts
 var core = __toESM(require_core(), 1);
-function execCatch(error) {
-  if (error.message) {
-    core.debug(String(error));
-  }
-  return 1;
-}
-
-// src/polyfills/yarn.ts
-async function polyfillYarn() {
-  const isYarnInstalled = await exec.exec("yarn", ["--version"], { ignoreReturnCode: true, failOnStdErr: false }).catch(execCatch) === 0;
-  if (isYarnInstalled) {
-    core2.info("Yarn already installed.");
-    return;
-  }
-  core2.info("Installing Yarn...");
-  const commands = ["curl -o- -L https://yarnpkg.com/install.sh | bash"];
-  for (const command of commands) {
-    core2.debug(`Running command: ${command}`);
-    const response = await exec.exec(command, void 0, {
-      ignoreReturnCode: true,
-      failOnStdErr: false,
-      listeners: {
-        stdout: (data) => {
-          core2.debug(data.toString());
-        },
-        stderr: (data) => {
-          core2.debug(data.toString());
-        }
-      }
-    }).catch(execCatch);
-    if (response !== 0) {
-      core2.setFailed(`Command failed: ${command}`);
-      return;
-    }
-  }
-  core2.debug("Adding Yarn to PATH...");
-  core2.addPath("/usr/local/share/.config/yarn/global/node_modules/.bin");
-  core2.info("Yarn installed.");
-}
-
-// src/index.ts
+var exec = __toESM(require_exec(), 1);
+import process2 from "node:process";
 var POLYFILLS = {
-  yarn: polyfillYarn
+  yarn: "sudo apt-get install -y --no-install-recommends yarn",
+  curl: "sudo apt-get install -y --no-install-recommends curl",
+  git: "sudo apt-get install -y --no-install-recommends git",
+  jq: "sudo apt-get install -y --no-install-recommends jq"
 };
 try {
   const platform = process2.platform;
   if (platform !== "linux") {
     throw new Error(`Unsupported platform: ${platform}`);
   }
-  const ignoredModules = core3.getInput("ignored").split(",").map((module) => module.trim());
-  for (const [polyfill, polyfillFunction] of Object.entries(POLYFILLS)) {
+  const ignoredModules = core.getInput("ignored").split(",").map((module) => module.trim());
+  if (ignoredModules.length === Object.keys(POLYFILLS).length) {
+    throw new Error("All polyfills are ignored. Please check your configuration.");
+  }
+  core.debug("Installing dependencies...");
+  await exec.exec("sudo apt-get update", void 0, {
+    listeners: {
+      stdout: (data) => {
+        core.info(data.toString());
+      },
+      stderr: (data) => {
+        core.info(data.toString());
+      }
+    }
+  });
+  for (const [polyfill, polyfillCommand] of Object.entries(POLYFILLS)) {
     if (ignoredModules.includes(polyfill)) {
-      core3.info(`Skipping ${polyfill} polyfill...`);
+      core.info(`Skipping ${polyfill} polyfill...`);
       continue;
     }
-    core3.info(`Running ${polyfill} polyfill...`);
-    await polyfillFunction();
+    core.info(`Running ${polyfill} polyfill...`);
+    const code = await exec.exec(polyfillCommand, void 0, {
+      listeners: {
+        stdout: (data) => {
+          core.info(data.toString());
+        },
+        stderr: (data) => {
+          core.info(data.toString());
+        }
+      }
+    });
+    if (code !== 0) {
+      throw new Error(`Polyfill ${polyfill} failed with exit code ${code}.`);
+    }
   }
 } catch (error) {
-  core3.debug(String(error));
+  core.debug(String(error));
   if (error.message) {
-    core3.setFailed(error.message);
+    core.setFailed(error.message);
   }
-  core3.setFailed("An unexpected error occurred. Please contact the package maintainer if the problem persists.");
+  core.setFailed("An unexpected error occurred. Please contact the package maintainer if the problem persists.");
 }
 /*! Bundled license information:
 

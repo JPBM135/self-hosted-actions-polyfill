@@ -1,6 +1,6 @@
 {
 	"name": "@jpbm135/self-hosted-action-polyfill",
-	"version": "1.0.21",
+	"version": "1.0.22",
 	"description": "Polyfills for self hosted actions",
 	"main": "dist/index.mjs",
 	"scripts": {
