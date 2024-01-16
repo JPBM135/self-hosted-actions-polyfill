@@ -19,9 +19,18 @@ jobs:
 
       - name: Get commits
         id: get_commits
-        run: |
-          echo "commits=$( git log --pretty=format:"%s (%an)" $(git describe --tags --abbrev=0 @^)..@ | sed "s/,$//")" >> $GITHUB_OUTPUT
-        shell: bash
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const commits = await github.repos.compareCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              base: context.payload.before,
+              head: context.payload.after
+            });
+            const commitsParsed =  commits.data.commits.map(commit => `- ${commit.commit.message} (${commit.author.login})`);
+
+            core.setOutput('commits', commitsParsed.join('\n'));
 
       - name: Create Release
         id: create_release
