@@ -1,0 +1,13 @@
+name: 'Self Hosted Action Polyfill'
+description: 'Loads modules and binaries that are not available in the GitHub Actions self-hosted runner environment but are available in the GitHub Actions cloud environment.'
+input:
+  ignore: # List of modules and binaries to ignore
+    description: 'List of modules and binaries to ignore'
+    required: false
+    default: []
+    type: array
+    items:
+      type: string
+runs:
+  using: 'node20'
+  main: 'dist/index.mjs'
