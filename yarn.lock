@@ -544,9 +544,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jpbm135/template@workspace:.":
+"@jpbm135/self-hosted-action-polyfill@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@jpbm135/template@workspace:."
+  resolution: "@jpbm135/self-hosted-action-polyfill@workspace:."
   dependencies:
     "@actions/core": "npm:^1.10.1"
     "@actions/exec": "npm:^1.1.1"
