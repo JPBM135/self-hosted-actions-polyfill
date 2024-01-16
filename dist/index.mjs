@@ -19921,7 +19921,18 @@ async function polyfillYarn() {
   const commands = ["curl -o- -L https://yarnpkg.com/install.sh | bash"];
   for (const command of commands) {
     core2.debug(`Running command: ${command}`);
-    const response = await exec.exec(command, void 0, { ignoreReturnCode: true, failOnStdErr: false }).catch(execCatch);
+    const response = await exec.exec(command, void 0, {
+      ignoreReturnCode: true,
+      failOnStdErr: false,
+      listeners: {
+        stdout: (data) => {
+          core2.debug(data.toString());
+        },
+        stderr: (data) => {
+          core2.debug(data.toString());
+        }
+      }
+    }).catch(execCatch);
     if (response !== 0) {
       core2.setFailed(`Command failed: ${command}`);
       return;
