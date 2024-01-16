@@ -12,11 +12,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          ref: ${{ github.ref }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
+          cache: 'yarn'
 
       - name: Install dependencies
         run: yarn --immutable
@@ -37,6 +42,7 @@ jobs:
 
       - name: Commit changes
         run: |
+
           git add --all
           git commit -m "Release ${{ github.ref }}"
           git tag ${{ github.ref }} -m "Release ${{ github.ref }}"
