@@ -730,7 +730,7 @@ var require_tunnel = __commonJS({
         connectOptions.headers = connectOptions.headers || {};
         connectOptions.headers["Proxy-Authorization"] = "Basic " + new Buffer(connectOptions.proxyAuth).toString("base64");
       }
-      debug3("making CONNECT request");
+      debug4("making CONNECT request");
       var connectReq = self.request(connectOptions);
       connectReq.useChunkedEncodingByDefault = false;
       connectReq.once("response", onResponse);
@@ -750,7 +750,7 @@ var require_tunnel = __commonJS({
         connectReq.removeAllListeners();
         socket.removeAllListeners();
         if (res.statusCode !== 200) {
-          debug3(
+          debug4(
             "tunneling socket could not be established, statusCode=%d",
             res.statusCode
           );
@@ -762,7 +762,7 @@ var require_tunnel = __commonJS({
           return;
         }
         if (head.length > 0) {
-          debug3("got illegal response body from proxy");
+          debug4("got illegal response body from proxy");
           socket.destroy();
           var error = new Error("got illegal response body from proxy");
           error.code = "ECONNRESET";
@@ -770,13 +770,13 @@ var require_tunnel = __commonJS({
           self.removeSocket(placeholder);
           return;
         }
-        debug3("tunneling connection has established");
+        debug4("tunneling connection has established");
         self.sockets[self.sockets.indexOf(placeholder)] = socket;
         return cb(socket);
       }
       function onError(cause) {
         connectReq.removeAllListeners();
-        debug3(
+        debug4(
           "tunneling socket could not be established, cause=%s\n",
           cause.message,
           cause.stack
@@ -838,9 +838,9 @@ var require_tunnel = __commonJS({
       }
       return target;
     }
-    var debug3;
+    var debug4;
     if (process.env.NODE_DEBUG && /\btunnel\b/.test(process.env.NODE_DEBUG)) {
-      debug3 = function() {
+      debug4 = function() {
         var args = Array.prototype.slice.call(arguments);
         if (typeof args[0] === "string") {
           args[0] = "TUNNEL: " + args[0];
@@ -850,10 +850,10 @@ var require_tunnel = __commonJS({
         console.error.apply(console, args);
       };
     } else {
-      debug3 = function() {
+      debug4 = function() {
       };
     }
-    exports.debug = debug3;
+    exports.debug = debug4;
   }
 });
 
@@ -18781,10 +18781,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       return process.env["RUNNER_DEBUG"] === "1";
     }
     exports.isDebug = isDebug;
-    function debug3(message) {
+    function debug4(message) {
       command_1.issueCommand("debug", {}, message);
     }
-    exports.debug = debug3;
+    exports.debug = debug4;
     function error(message, properties = {}) {
       command_1.issueCommand("error", utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
     }
@@ -19894,27 +19894,38 @@ var require_exec = __commonJS({
 });
 
 // src/index.ts
-var core2 = __toESM(require_core(), 1);
+var core3 = __toESM(require_core(), 1);
 
 // src/polyfills/yarn.ts
-var core = __toESM(require_core(), 1);
+var core2 = __toESM(require_core(), 1);
 var exec = __toESM(require_exec(), 1);
+
+// src/utils/execCatch.ts
+var core = __toESM(require_core(), 1);
+function execCatch(error) {
+  if (error.message) {
+    core.debug(String(error));
+  }
+  return 1;
+}
+
+// src/polyfills/yarn.ts
 async function polyfillYarn() {
-  const isYarnInstalled = await exec.exec("yarn", ["--version"], { ignoreReturnCode: true }) === 0;
+  const isYarnInstalled = await exec.exec("yarn", ["--version"], { ignoreReturnCode: true, failOnStdErr: false }).catch(execCatch) === 0;
   if (isYarnInstalled) {
-    core.info("Yarn already installed.");
+    core2.info("Yarn already installed.");
     return;
   }
-  core.info("Installing Yarn...");
-  const isNpmInstalled = await exec.exec("npm", ["--version"], { ignoreReturnCode: true }) === 0;
+  core2.info("Installing Yarn...");
+  const isNpmInstalled = await exec.exec("npm", ["--version"], { ignoreReturnCode: true, failOnStdErr: false }).catch(execCatch) === 0;
   if (!isNpmInstalled) {
-    core.info("Installing NPM...");
+    core2.info("Installing NPM...");
     await exec.exec("sudo", ["apt-get", "install", "npm", "-y"]);
   }
   await exec.exec("sudo", ["npm", "install", "-g", "yarn"]);
-  core.debug("Adding Yarn to PATH...");
-  core.addPath("/usr/local/share/.config/yarn/global/node_modules/.bin");
-  core.info("Yarn installed.");
+  core2.debug("Adding Yarn to PATH...");
+  core2.addPath("/usr/local/share/.config/yarn/global/node_modules/.bin");
+  core2.info("Yarn installed.");
 }
 
 // src/index.ts
@@ -19922,21 +19933,21 @@ var POLYFILLS = {
   yarn: polyfillYarn
 };
 try {
-  const ignoredModules = core2.getInput("ignored").split(",").map((module) => module.trim());
+  const ignoredModules = core3.getInput("ignored").split(",").map((module) => module.trim());
   for (const [polyfill, polyfillFunction] of Object.entries(POLYFILLS)) {
     if (ignoredModules.includes(polyfill)) {
-      core2.info(`Skipping ${polyfill} polyfill...`);
+      core3.info(`Skipping ${polyfill} polyfill...`);
       continue;
     }
-    core2.info(`Running ${polyfill} polyfill...`);
+    core3.info(`Running ${polyfill} polyfill...`);
     await polyfillFunction();
   }
 } catch (error) {
-  core2.debug(String(error));
+  core3.debug(String(error));
   if (error.message) {
-    core2.setFailed(error.message);
+    core3.setFailed(error.message);
   }
-  core2.setFailed("An unexpected error occurred. Please contact the package maintainer if the problem persists.");
+  core3.setFailed("An unexpected error occurred. Please contact the package maintainer if the problem persists.");
 }
 /*! Bundled license information:
 
