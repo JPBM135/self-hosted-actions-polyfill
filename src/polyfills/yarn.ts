@@ -13,12 +13,7 @@ export async function polyfillYarn() {
 
   core.info('Installing Yarn...');
 
-  const commands = [
-    'curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -',
-    'echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list',
-    'sudo apt update',
-    'sudo apt install yarn',
-  ];
+  const commands = ['curl -o- -L https://yarnpkg.com/install.sh | bash'];
 
   for (const command of commands) {
     core.debug(`Running command: ${command}`);
