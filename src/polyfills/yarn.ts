@@ -1,8 +1,10 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import { execCatch } from '../utils/execCatch.js';
 
 export async function polyfillYarn() {
-	const isYarnInstalled = (await exec.exec('yarn', ['--version'], { ignoreReturnCode: true })) === 0;
+	const isYarnInstalled =
+		(await exec.exec('yarn', ['--version'], { ignoreReturnCode: true, failOnStdErr: false }).catch(execCatch)) === 0;
 
 	if (isYarnInstalled) {
 		core.info('Yarn already installed.');
@@ -11,7 +13,8 @@ export async function polyfillYarn() {
 
 	core.info('Installing Yarn...');
 
-	const isNpmInstalled = (await exec.exec('npm', ['--version'], { ignoreReturnCode: true })) === 0;
+	const isNpmInstalled =
+		(await exec.exec('npm', ['--version'], { ignoreReturnCode: true, failOnStdErr: false }).catch(execCatch)) === 0;
 
 	if (!isNpmInstalled) {
 		core.info('Installing NPM...');
