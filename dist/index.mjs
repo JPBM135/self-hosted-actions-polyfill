@@ -18772,11 +18772,11 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       command_1.issue("echo", enabled ? "on" : "off");
     }
     exports.setCommandEcho = setCommandEcho;
-    function setFailed2(message) {
+    function setFailed3(message) {
       process.exitCode = ExitCode.Failure;
       error(message);
     }
-    exports.setFailed = setFailed2;
+    exports.setFailed = setFailed3;
     function isDebug() {
       return process.env["RUNNER_DEBUG"] === "1";
     }
@@ -19895,6 +19895,7 @@ var require_exec = __commonJS({
 
 // src/index.ts
 var core3 = __toESM(require_core(), 1);
+import process2 from "node:process";
 
 // src/polyfills/yarn.ts
 var core2 = __toESM(require_core(), 1);
@@ -19917,12 +19918,20 @@ async function polyfillYarn() {
     return;
   }
   core2.info("Installing Yarn...");
-  const isNpmInstalled = await exec.exec("npm", ["--version"], { ignoreReturnCode: true, failOnStdErr: false }).catch(execCatch) === 0;
-  if (!isNpmInstalled) {
-    core2.info("Installing NPM...");
-    await exec.exec("sudo", ["apt-get", "install", "npm", "-y"]);
+  const commands = [
+    "curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -",
+    'echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list',
+    "sudo apt update",
+    "sudo apt install yarn"
+  ];
+  for (const command of commands) {
+    core2.debug(`Running command: ${command}`);
+    const response = await exec.exec(command, void 0, { ignoreReturnCode: true, failOnStdErr: false }).catch(execCatch);
+    if (response !== 0) {
+      core2.setFailed(`Command failed: ${command}`);
+      return;
+    }
   }
-  await exec.exec("sudo", ["npm", "install", "-g", "yarn"]);
   core2.debug("Adding Yarn to PATH...");
   core2.addPath("/usr/local/share/.config/yarn/global/node_modules/.bin");
   core2.info("Yarn installed.");
@@ -19933,6 +19942,10 @@ var POLYFILLS = {
   yarn: polyfillYarn
 };
 try {
+  const platform = process2.platform;
+  if (platform !== "linux") {
+    throw new Error(`Unsupported platform: ${platform}`);
+  }
   const ignoredModules = core3.getInput("ignored").split(",").map((module) => module.trim());
   for (const [polyfill, polyfillFunction] of Object.entries(POLYFILLS)) {
     if (ignoredModules.includes(polyfill)) {
