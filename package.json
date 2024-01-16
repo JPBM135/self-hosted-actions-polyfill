@@ -1,7 +1,8 @@
 {
-	"name": "@jpbm135/template",
+	"name": "@jpbm135/self-hosted-action-polyfill",
 	"version": "1.0.0",
-	"description": "",
+	"description": "Polyfills for self hosted actions",
+	"main": "dist/index.mjs",
 	"scripts": {
 		"build:clean": "del-cli dist",
 		"build:check": "tsc --noEmit",
@@ -20,7 +21,7 @@
 	"keywords": [],
 	"author": "JPBM135 <jpedrobm0@gmail.com>",
 	"license": "AGPL-3.0",
-	"private": true,
+	"private": false,
 	"dependencies": {
 		"@actions/core": "^1.10.1",
 		"@actions/exec": "^1.1.1",
