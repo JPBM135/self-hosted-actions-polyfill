@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: yarn --immutable
+
+      - name: Build
+        run: yarn build
+
+      - name: Set up git user
+        run: |
+          git config --local user.email "jpedrobm0@gmail.com"
+          git config --local user.name "JPBM135"
+
+      - name: Get commits
+        id: get_commits
+        run: |
+          echo "commits=$( git log --pretty=format:"%s (%an)" $(git describe --tags --abbrev=0 @^)..@ | tr "\n" "," | sed "s/,$//" >> $GITHUB_OUTPUT)" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Commit changes
+        run: |
+          git add --all
+          git commit -m "Release ${{ github.ref }}"
+          git tag ${{ github.ref }} -m "Release ${{ github.ref }}"
+          git push origin main --follow-tags
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: ${{ steps.get_commits.outputs.commits }}
+          draft: false
+          prerelease: false
