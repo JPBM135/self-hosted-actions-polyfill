@@ -42,11 +42,13 @@ jobs:
 
       - name: Commit changes
         run: |
-
+          git pull origin ${{ github.ref }}
           git add --all
           git commit -m "Release ${{ github.ref }}"
           git tag ${{ github.ref }} -m "Release ${{ github.ref }}"
           git push origin ${{ github.ref }} --follow-tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         id: create_release
