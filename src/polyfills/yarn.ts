@@ -1,3 +1,4 @@
+import type { Buffer } from 'node:buffer';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import { execCatch } from '../utils/execCatch.js';
@@ -18,7 +19,18 @@ export async function polyfillYarn() {
   for (const command of commands) {
     core.debug(`Running command: ${command}`);
     const response = await exec
-      .exec(command, undefined, { ignoreReturnCode: true, failOnStdErr: false })
+      .exec(command, undefined, {
+        ignoreReturnCode: true,
+        failOnStdErr: false,
+        listeners: {
+          stdout: (data: Buffer) => {
+            core.debug(data.toString());
+          },
+          stderr: (data: Buffer) => {
+            core.debug(data.toString());
+          },
+        },
+      })
       .catch(execCatch);
 
     if (response !== 0) {

@@ -50,7 +50,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name: context.ref.replace('refs/tags/', ''),
-              name: context.ref,
+              name: context.ref.replace('refs/tags/', ''),
               body: commitsParsed.join('\n')
             });
 
