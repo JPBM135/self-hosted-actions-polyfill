@@ -37,7 +37,7 @@ jobs:
       - name: Get commits
         id: get_commits
         run: |
-          echo "commits=$( git log --pretty=format:"%s (%an)" $(git describe --tags --abbrev=0 @^)..@ | tr "\n" "," | sed "s/,$//" >> $GITHUB_OUTPUT)" >> $GITHUB_OUTPUT
+          echo "commits=$( git log --pretty=format:"%s (%an)" $(git describe --tags --abbrev=0 @^)..@ | tr "\n" "," | sed "s/,$//")" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Commit changes

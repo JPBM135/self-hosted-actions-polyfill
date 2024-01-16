@@ -3,30 +3,38 @@ import * as exec from '@actions/exec';
 import { execCatch } from '../utils/execCatch.js';
 
 export async function polyfillYarn() {
-	const isYarnInstalled =
-		(await exec.exec('yarn', ['--version'], { ignoreReturnCode: true, failOnStdErr: false }).catch(execCatch)) === 0;
+  const isYarnInstalled =
+    (await exec.exec('yarn', ['--version'], { ignoreReturnCode: true, failOnStdErr: false }).catch(execCatch)) === 0;
 
-	if (isYarnInstalled) {
-		core.info('Yarn already installed.');
-		return;
-	}
+  if (isYarnInstalled) {
+    core.info('Yarn already installed.');
+    return;
+  }
 
-	core.info('Installing Yarn...');
+  core.info('Installing Yarn...');
 
-	const isNpmInstalled =
-		(await exec.exec('npm', ['--version'], { ignoreReturnCode: true, failOnStdErr: false }).catch(execCatch)) === 0;
+  const commands = [
+    'curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -',
+    'echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list',
+    'sudo apt update',
+    'sudo apt install yarn',
+  ];
 
-	if (!isNpmInstalled) {
-		core.info('Installing NPM...');
+  for (const command of commands) {
+    core.debug(`Running command: ${command}`);
+    const response = await exec
+      .exec(command, undefined, { ignoreReturnCode: true, failOnStdErr: false })
+      .catch(execCatch);
 
-		await exec.exec('sudo', ['apt-get', 'install', 'npm', '-y']);
-	}
+    if (response !== 0) {
+      core.setFailed(`Command failed: ${command}`);
+      return;
+    }
+  }
 
-	await exec.exec('sudo', ['npm', 'install', '-g', 'yarn']);
+  core.debug('Adding Yarn to PATH...');
 
-	core.debug('Adding Yarn to PATH...');
+  core.addPath('/usr/local/share/.config/yarn/global/node_modules/.bin');
 
-	core.addPath('/usr/local/share/.config/yarn/global/node_modules/.bin');
-
-	core.info('Yarn installed.');
+  core.info('Yarn installed.');
 }
