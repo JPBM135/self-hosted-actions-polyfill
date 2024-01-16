@@ -1,4 +1,4 @@
-VERSION=$(node -p -e "require('./package.json').version")
+VERSION=v$(node -p -e "require('./package.json').version")
 
 yarn build
 git add --all
