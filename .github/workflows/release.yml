@@ -17,8 +17,7 @@ jobs:
           fetch-tags: true
           ref: ${{ github.ref }}
 
-      - name: Get commits
-        id: get_commits
+      - name: Get commits and create release
         uses: actions/github-script@v3
         with:
           script: |
@@ -44,16 +43,12 @@ jobs:
 
             const commitsParsed = commits.data.commits.map(commit => `- ${commit.commit.message} (${commit.author.login})`);
 
-            core.setOutput('commits', commitsParsed.join('\n'));
+            const release = await github.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: context.ref.replace('refs/tags/', ''),
+              name: context.ref,
+              body: commitsParsed.join('\n')
+            });
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body: ${{ steps.get_commits.outputs.commits }}
-          draft: false
-          prerelease: false
+            core.setOutput('release_id', release.data.id);
