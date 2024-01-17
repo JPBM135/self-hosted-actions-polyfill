@@ -19935,7 +19935,8 @@ try {
       continue;
     }
     core.info(`Running ${polyfill} polyfill...`);
-    const code = await exec.exec(polyfillCommand, void 0, {
+    const prefixedCommand = ["bash", "-c", polyfillCommand];
+    const code = await exec.exec(prefixedCommand[0], [prefixedCommand[1], prefixedCommand[2]], {
       listeners: {
         stdout: (data) => {
           core.info(data.toString());
@@ -19953,8 +19954,9 @@ try {
   core.debug(String(error));
   if (error.message) {
     core.setFailed(error.message);
+  } else {
+    core.setFailed("An unexpected error occurred. Please contact the package maintainer if the problem persists.");
   }
-  core.setFailed("An unexpected error occurred. Please contact the package maintainer if the problem persists.");
 }
 /*! Bundled license information:
 
