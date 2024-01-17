@@ -52,7 +52,9 @@ try {
     }
 
     core.info(`Running ${polyfill} polyfill...`);
-    const code = await exec.exec(polyfillCommand, undefined, {
+    const prefixedCommand: [string, string, string] = ['bash', '-c', polyfillCommand];
+
+    const code = await exec.exec(prefixedCommand[0], [prefixedCommand[1], prefixedCommand[2]], {
       listeners: {
         stdout: (data: Buffer) => {
           core.info(data.toString());
