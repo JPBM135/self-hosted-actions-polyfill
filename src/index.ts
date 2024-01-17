@@ -74,7 +74,7 @@ try {
 
   if ((error as Error).message) {
     core.setFailed((error as Error).message);
+  } else {
+    core.setFailed('An unexpected error occurred. Please contact the package maintainer if the problem persists.');
   }
-
-  core.setFailed('An unexpected error occurred. Please contact the package maintainer if the problem persists.');
 }
