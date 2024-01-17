@@ -19899,7 +19899,8 @@ var exec = __toESM(require_exec(), 1);
 import process2 from "node:process";
 var POLYFILLS = {
   curl: "sudo apt-get install -y --no-install-recommends curl",
-  yarn: "curl -o- -L https://yarnpkg.com/install.sh | bash",
+  // This script will error because the node environment is not set up yet.
+  yarn: "curl -o- -L https://yarnpkg.com/install.sh | bash || true",
   git: "sudo apt-get install -y --no-install-recommends git",
   jq: "sudo apt-get install -y --no-install-recommends jq",
   "config-dir": "mkdir -p ~/.config"
