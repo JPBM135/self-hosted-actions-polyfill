@@ -19900,10 +19900,9 @@ import process2 from "node:process";
 var POLYFILLS = {
   curl: "sudo apt-get install -y --no-install-recommends curl",
   // This script will error because the node environment is not set up yet.
-  yarn: "curl -o- -L https://yarnpkg.com/install.sh | bash || true",
+  yarn: 'curl -o- -L https://yarnpkg.com/install.sh | bash || true && echo "$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH" >> $GITHUB_PATH',
   git: "sudo apt-get install -y --no-install-recommends git",
-  jq: "sudo apt-get install -y --no-install-recommends jq",
-  "config-dir": "mkdir -p ~/.config"
+  jq: "sudo apt-get install -y --no-install-recommends jq"
 };
 try {
   const platform = process2.platform;
