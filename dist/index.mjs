@@ -106,11 +106,11 @@ var require_command = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.issue = exports.issueCommand = void 0;
-    var os = __importStar(__require("os"));
+    var os2 = __importStar(__require("os"));
     var utils_1 = require_utils();
     function issueCommand(command, properties, message) {
       const cmd = new Command(command, properties, message);
-      process.stdout.write(cmd.toString() + os.EOL);
+      process.stdout.write(cmd.toString() + os2.EOL);
     }
     exports.issueCommand = issueCommand;
     function issue(name, message = "") {
@@ -527,7 +527,7 @@ var require_file_command = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.prepareKeyValueMessage = exports.issueFileCommand = void 0;
     var fs = __importStar(__require("fs"));
-    var os = __importStar(__require("os"));
+    var os2 = __importStar(__require("os"));
     var uuid_1 = (init_esm_node(), __toCommonJS(esm_node_exports));
     var utils_1 = require_utils();
     function issueFileCommand(command, message) {
@@ -538,7 +538,7 @@ var require_file_command = __commonJS({
       if (!fs.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
       }
-      fs.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os.EOL}`, {
+      fs.appendFileSync(filePath, `${utils_1.toCommandValue(message)}${os2.EOL}`, {
         encoding: "utf8"
       });
     }
@@ -552,7 +552,7 @@ var require_file_command = __commonJS({
       if (convertedValue.includes(delimiter)) {
         throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter}"`);
       }
-      return `${key}<<${delimiter}${os.EOL}${convertedValue}${os.EOL}${delimiter}`;
+      return `${key}<<${delimiter}${os2.EOL}${convertedValue}${os2.EOL}${delimiter}`;
     }
     exports.prepareKeyValueMessage = prepareKeyValueMessage;
   }
@@ -730,7 +730,7 @@ var require_tunnel = __commonJS({
         connectOptions.headers = connectOptions.headers || {};
         connectOptions.headers["Proxy-Authorization"] = "Basic " + new Buffer(connectOptions.proxyAuth).toString("base64");
       }
-      debug2("making CONNECT request");
+      debug4("making CONNECT request");
       var connectReq = self.request(connectOptions);
       connectReq.useChunkedEncodingByDefault = false;
       connectReq.once("response", onResponse);
@@ -750,40 +750,40 @@ var require_tunnel = __commonJS({
         connectReq.removeAllListeners();
         socket.removeAllListeners();
         if (res.statusCode !== 200) {
-          debug2(
+          debug4(
             "tunneling socket could not be established, statusCode=%d",
             res.statusCode
           );
           socket.destroy();
-          var error = new Error("tunneling socket could not be established, statusCode=" + res.statusCode);
-          error.code = "ECONNRESET";
-          options.request.emit("error", error);
+          var error2 = new Error("tunneling socket could not be established, statusCode=" + res.statusCode);
+          error2.code = "ECONNRESET";
+          options.request.emit("error", error2);
           self.removeSocket(placeholder);
           return;
         }
         if (head.length > 0) {
-          debug2("got illegal response body from proxy");
+          debug4("got illegal response body from proxy");
           socket.destroy();
-          var error = new Error("got illegal response body from proxy");
-          error.code = "ECONNRESET";
-          options.request.emit("error", error);
+          var error2 = new Error("got illegal response body from proxy");
+          error2.code = "ECONNRESET";
+          options.request.emit("error", error2);
           self.removeSocket(placeholder);
           return;
         }
-        debug2("tunneling connection has established");
+        debug4("tunneling connection has established");
         self.sockets[self.sockets.indexOf(placeholder)] = socket;
         return cb(socket);
       }
       function onError(cause) {
         connectReq.removeAllListeners();
-        debug2(
+        debug4(
           "tunneling socket could not be established, cause=%s\n",
           cause.message,
           cause.stack
         );
-        var error = new Error("tunneling socket could not be established, cause=" + cause.message);
-        error.code = "ECONNRESET";
-        options.request.emit("error", error);
+        var error2 = new Error("tunneling socket could not be established, cause=" + cause.message);
+        error2.code = "ECONNRESET";
+        options.request.emit("error", error2);
         self.removeSocket(placeholder);
       }
     };
@@ -838,9 +838,9 @@ var require_tunnel = __commonJS({
       }
       return target;
     }
-    var debug2;
+    var debug4;
     if (process.env.NODE_DEBUG && /\btunnel\b/.test(process.env.NODE_DEBUG)) {
-      debug2 = function() {
+      debug4 = function() {
         var args = Array.prototype.slice.call(arguments);
         if (typeof args[0] === "string") {
           args[0] = "TUNNEL: " + args[0];
@@ -850,10 +850,10 @@ var require_tunnel = __commonJS({
         console.error.apply(console, args);
       };
     } else {
-      debug2 = function() {
+      debug4 = function() {
       };
     }
-    exports.debug = debug2;
+    exports.debug = debug4;
   }
 });
 
@@ -5740,7 +5740,7 @@ Content-Type: ${value.type || "application/octet-stream"}\r
         throw new TypeError("Body is unusable");
       }
       const promise = createDeferredPromise();
-      const errorSteps = (error) => promise.reject(error);
+      const errorSteps = (error2) => promise.reject(error2);
       const successSteps = (data) => {
         try {
           promise.resolve(convertBytesToJSValue(data));
@@ -6026,16 +6026,16 @@ var require_request = __commonJS({
           this.onError(err);
         }
       }
-      onError(error) {
+      onError(error2) {
         this.onFinally();
         if (channels.error.hasSubscribers) {
-          channels.error.publish({ request: this, error });
+          channels.error.publish({ request: this, error: error2 });
         }
         if (this.aborted) {
           return;
         }
         this.aborted = true;
-        return this[kHandler].onError(error);
+        return this[kHandler].onError(error2);
       }
       onFinally() {
         if (this.errorHandler) {
@@ -6907,8 +6907,8 @@ var require_RedirectHandler = __commonJS({
       onUpgrade(statusCode, headers, socket) {
         this.handler.onUpgrade(statusCode, headers, socket);
       }
-      onError(error) {
-        this.handler.onError(error);
+      onError(error2) {
+        this.handler.onError(error2);
       }
       onHeaders(statusCode, headers, resume, statusText) {
         this.location = this.history.length >= this.maxRedirections || util.isDisturbed(this.opts.body) ? null : parseLocation(statusCode, headers);
@@ -10644,13 +10644,13 @@ var require_mock_utils = __commonJS({
       if (mockDispatch2.data.callback) {
         mockDispatch2.data = { ...mockDispatch2.data, ...mockDispatch2.data.callback(opts) };
       }
-      const { data: { statusCode, data, headers, trailers, error }, delay, persist } = mockDispatch2;
+      const { data: { statusCode, data, headers, trailers, error: error2 }, delay, persist } = mockDispatch2;
       const { timesInvoked, times } = mockDispatch2;
       mockDispatch2.consumed = !persist && timesInvoked >= times;
       mockDispatch2.pending = timesInvoked < times;
-      if (error !== null) {
+      if (error2 !== null) {
         deleteMockDispatch(this[kDispatches], key);
-        handler.onError(error);
+        handler.onError(error2);
         return true;
       }
       if (typeof delay === "number" && delay > 0) {
@@ -10688,19 +10688,19 @@ var require_mock_utils = __commonJS({
         if (agent.isMockActive) {
           try {
             mockDispatch.call(this, opts, handler);
-          } catch (error) {
-            if (error instanceof MockNotMatchedError) {
+          } catch (error2) {
+            if (error2 instanceof MockNotMatchedError) {
               const netConnect = agent[kGetNetConnect]();
               if (netConnect === false) {
-                throw new MockNotMatchedError(`${error.message}: subsequent request to origin ${origin} was not allowed (net.connect disabled)`);
+                throw new MockNotMatchedError(`${error2.message}: subsequent request to origin ${origin} was not allowed (net.connect disabled)`);
               }
               if (checkNetConnect(netConnect, origin)) {
                 originalDispatch.call(this, opts, handler);
               } else {
-                throw new MockNotMatchedError(`${error.message}: subsequent request to origin ${origin} was not allowed (net.connect is not enabled for this origin)`);
+                throw new MockNotMatchedError(`${error2.message}: subsequent request to origin ${origin} was not allowed (net.connect is not enabled for this origin)`);
               }
             } else {
-              throw error;
+              throw error2;
             }
           }
         } else {
@@ -10863,11 +10863,11 @@ var require_mock_interceptor = __commonJS({
       /**
        * Mock an undici request with a defined error.
        */
-      replyWithError(error) {
-        if (typeof error === "undefined") {
+      replyWithError(error2) {
+        if (typeof error2 === "undefined") {
           throw new InvalidArgumentError("error must be defined");
         }
-        const newMockDispatch = addMockDispatch(this[kDispatches], this[kDispatchKey], { error });
+        const newMockDispatch = addMockDispatch(this[kDispatches], this[kDispatchKey], { error: error2 });
         return new MockScope(newMockDispatch);
       }
       /**
@@ -13193,17 +13193,17 @@ var require_fetch = __commonJS({
         this.emit("terminated", reason);
       }
       // https://fetch.spec.whatwg.org/#fetch-controller-abort
-      abort(error) {
+      abort(error2) {
         if (this.state !== "ongoing") {
           return;
         }
         this.state = "aborted";
-        if (!error) {
-          error = new DOMException2("The operation was aborted.", "AbortError");
+        if (!error2) {
+          error2 = new DOMException2("The operation was aborted.", "AbortError");
         }
-        this.serializedAbortReason = error;
-        this.connection?.destroy(error);
-        this.emit("terminated", error);
+        this.serializedAbortReason = error2;
+        this.connection?.destroy(error2);
+        this.emit("terminated", error2);
       }
     };
     function fetch(input, init = {}) {
@@ -13307,13 +13307,13 @@ var require_fetch = __commonJS({
         performance.markResourceTiming(timingInfo, originalURL.href, initiatorType, globalThis2, cacheState);
       }
     }
-    function abortFetch(p, request, responseObject, error) {
-      if (!error) {
-        error = new DOMException2("The operation was aborted.", "AbortError");
+    function abortFetch(p, request, responseObject, error2) {
+      if (!error2) {
+        error2 = new DOMException2("The operation was aborted.", "AbortError");
       }
-      p.reject(error);
+      p.reject(error2);
       if (request.body != null && isReadable(request.body?.stream)) {
-        request.body.stream.cancel(error).catch((err) => {
+        request.body.stream.cancel(error2).catch((err) => {
           if (err.code === "ERR_INVALID_STATE") {
             return;
           }
@@ -13325,7 +13325,7 @@ var require_fetch = __commonJS({
       }
       const response = responseObject[kState];
       if (response.body != null && isReadable(response.body?.stream)) {
-        response.body.stream.cancel(error).catch((err) => {
+        response.body.stream.cancel(error2).catch((err) => {
           if (err.code === "ERR_INVALID_STATE") {
             return;
           }
@@ -14104,13 +14104,13 @@ var require_fetch = __commonJS({
               fetchParams.controller.ended = true;
               this.body.push(null);
             },
-            onError(error) {
+            onError(error2) {
               if (this.abort) {
                 fetchParams.controller.off("terminated", this.abort);
               }
-              this.body?.destroy(error);
-              fetchParams.controller.terminate(error);
-              reject(error);
+              this.body?.destroy(error2);
+              fetchParams.controller.terminate(error2);
+              reject(error2);
             },
             onUpgrade(status, headersList, socket) {
               if (status !== 101) {
@@ -14576,8 +14576,8 @@ var require_util4 = __commonJS({
                   }
                   fr[kResult] = result;
                   fireAProgressEvent("load", fr);
-                } catch (error) {
-                  fr[kError] = error;
+                } catch (error2) {
+                  fr[kError] = error2;
                   fireAProgressEvent("error", fr);
                 }
                 if (fr[kState] !== "loading") {
@@ -14586,13 +14586,13 @@ var require_util4 = __commonJS({
               });
               break;
             }
-          } catch (error) {
+          } catch (error2) {
             if (fr[kAborted]) {
               return;
             }
             queueMicrotask(() => {
               fr[kState] = "done";
-              fr[kError] = error;
+              fr[kError] = error2;
               fireAProgressEvent("error", fr);
               if (fr[kState] !== "loading") {
                 fireAProgressEvent("loadend", fr);
@@ -16608,11 +16608,11 @@ var require_connection = __commonJS({
         });
       }
     }
-    function onSocketError(error) {
+    function onSocketError(error2) {
       const { ws } = this;
       ws[kReadyState] = states.CLOSING;
       if (channels.socketError.hasSubscribers) {
-        channels.socketError.publish(error);
+        channels.socketError.publish(error2);
       }
       this.destroy();
     }
@@ -17761,12 +17761,12 @@ var require_lib = __commonJS({
             throw new Error("Client has already been disposed.");
           }
           const parsedUrl = new URL(requestUrl);
-          let info2 = this._prepareRequest(verb, parsedUrl, headers);
+          let info3 = this._prepareRequest(verb, parsedUrl, headers);
           const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb) ? this._maxRetries + 1 : 1;
           let numTries = 0;
           let response;
           do {
-            response = yield this.requestRaw(info2, data);
+            response = yield this.requestRaw(info3, data);
             if (response && response.message && response.message.statusCode === HttpCodes.Unauthorized) {
               let authenticationHandler;
               for (const handler of this.handlers) {
@@ -17776,7 +17776,7 @@ var require_lib = __commonJS({
                 }
               }
               if (authenticationHandler) {
-                return authenticationHandler.handleAuthentication(this, info2, data);
+                return authenticationHandler.handleAuthentication(this, info3, data);
               } else {
                 return response;
               }
@@ -17799,8 +17799,8 @@ var require_lib = __commonJS({
                   }
                 }
               }
-              info2 = this._prepareRequest(verb, parsedRedirectUrl, headers);
-              response = yield this.requestRaw(info2, data);
+              info3 = this._prepareRequest(verb, parsedRedirectUrl, headers);
+              response = yield this.requestRaw(info3, data);
               redirectsRemaining--;
             }
             if (!response.message.statusCode || !HttpResponseRetryCodes.includes(response.message.statusCode)) {
@@ -17829,7 +17829,7 @@ var require_lib = __commonJS({
        * @param info
        * @param data
        */
-      requestRaw(info2, data) {
+      requestRaw(info3, data) {
         return __awaiter(this, void 0, void 0, function* () {
           return new Promise((resolve, reject) => {
             function callbackForResult(err, res) {
@@ -17841,7 +17841,7 @@ var require_lib = __commonJS({
                 resolve(res);
               }
             }
-            this.requestRawWithCallback(info2, data, callbackForResult);
+            this.requestRawWithCallback(info3, data, callbackForResult);
           });
         });
       }
@@ -17851,12 +17851,12 @@ var require_lib = __commonJS({
        * @param data
        * @param onResult
        */
-      requestRawWithCallback(info2, data, onResult) {
+      requestRawWithCallback(info3, data, onResult) {
         if (typeof data === "string") {
-          if (!info2.options.headers) {
-            info2.options.headers = {};
+          if (!info3.options.headers) {
+            info3.options.headers = {};
           }
-          info2.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
+          info3.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
         }
         let callbackCalled = false;
         function handleResult(err, res) {
@@ -17865,7 +17865,7 @@ var require_lib = __commonJS({
             onResult(err, res);
           }
         }
-        const req = info2.httpModule.request(info2.options, (msg) => {
+        const req = info3.httpModule.request(info3.options, (msg) => {
           const res = new HttpClientResponse(msg);
           handleResult(void 0, res);
         });
@@ -17877,7 +17877,7 @@ var require_lib = __commonJS({
           if (socket) {
             socket.end();
           }
-          handleResult(new Error(`Request timeout: ${info2.options.path}`));
+          handleResult(new Error(`Request timeout: ${info3.options.path}`));
         });
         req.on("error", function(err) {
           handleResult(err);
@@ -17913,27 +17913,27 @@ var require_lib = __commonJS({
         return this._getProxyAgentDispatcher(parsedUrl, proxyUrl);
       }
       _prepareRequest(method, requestUrl, headers) {
-        const info2 = {};
-        info2.parsedUrl = requestUrl;
-        const usingSsl = info2.parsedUrl.protocol === "https:";
-        info2.httpModule = usingSsl ? https : http;
+        const info3 = {};
+        info3.parsedUrl = requestUrl;
+        const usingSsl = info3.parsedUrl.protocol === "https:";
+        info3.httpModule = usingSsl ? https : http;
         const defaultPort = usingSsl ? 443 : 80;
-        info2.options = {};
-        info2.options.host = info2.parsedUrl.hostname;
-        info2.options.port = info2.parsedUrl.port ? parseInt(info2.parsedUrl.port) : defaultPort;
-        info2.options.path = (info2.parsedUrl.pathname || "") + (info2.parsedUrl.search || "");
-        info2.options.method = method;
-        info2.options.headers = this._mergeHeaders(headers);
+        info3.options = {};
+        info3.options.host = info3.parsedUrl.hostname;
+        info3.options.port = info3.parsedUrl.port ? parseInt(info3.parsedUrl.port) : defaultPort;
+        info3.options.path = (info3.parsedUrl.pathname || "") + (info3.parsedUrl.search || "");
+        info3.options.method = method;
+        info3.options.headers = this._mergeHeaders(headers);
         if (this.userAgent != null) {
-          info2.options.headers["user-agent"] = this.userAgent;
+          info3.options.headers["user-agent"] = this.userAgent;
         }
-        info2.options.agent = this._getAgent(info2.parsedUrl);
+        info3.options.agent = this._getAgent(info3.parsedUrl);
         if (this.handlers) {
           for (const handler of this.handlers) {
-            handler.prepareRequest(info2.options);
+            handler.prepareRequest(info3.options);
           }
         }
-        return info2;
+        return info3;
       }
       _mergeHeaders(headers) {
         if (this.requestOptions && this.requestOptions.headers) {
@@ -18252,12 +18252,12 @@ var require_oidc_utils = __commonJS({
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
           const httpclient = _OidcClient.createHttpClient();
-          const res = yield httpclient.getJson(id_token_url).catch((error) => {
+          const res = yield httpclient.getJson(id_token_url).catch((error2) => {
             throw new Error(`Failed to get ID Token. 
  
-        Error Code : ${error.statusCode}
+        Error Code : ${error2.statusCode}
  
-        Error Message: ${error.message}`);
+        Error Message: ${error2.message}`);
           });
           const id_token = (_a = res.result) === null || _a === void 0 ? void 0 : _a.value;
           if (!id_token) {
@@ -18278,8 +18278,8 @@ var require_oidc_utils = __commonJS({
             const id_token = yield _OidcClient.getCall(id_token_url);
             core_1.setSecret(id_token);
             return id_token;
-          } catch (error) {
-            throw new Error(`Error message: ${error.message}`);
+          } catch (error2) {
+            throw new Error(`Error message: ${error2.message}`);
           }
         });
       }
@@ -18696,7 +18696,7 @@ var require_core = __commonJS({
     var command_1 = require_command();
     var file_command_1 = require_file_command();
     var utils_1 = require_utils();
-    var os = __importStar(__require("os"));
+    var os2 = __importStar(__require("os"));
     var path = __importStar(__require("path"));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
@@ -18718,7 +18718,7 @@ var require_core = __commonJS({
       command_1.issueCommand("add-mask", {}, secret);
     }
     exports.setSecret = setSecret;
-    function addPath(inputPath) {
+    function addPath2(inputPath) {
       const filePath = process.env["GITHUB_PATH"] || "";
       if (filePath) {
         file_command_1.issueFileCommand("PATH", inputPath);
@@ -18727,7 +18727,7 @@ var require_core = __commonJS({
       }
       process.env["PATH"] = `${inputPath}${path.delimiter}${process.env["PATH"]}`;
     }
-    exports.addPath = addPath;
+    exports.addPath = addPath2;
     function getInput2(name, options) {
       const val = process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] || "";
       if (options && options.required && !val) {
@@ -18747,7 +18747,7 @@ var require_core = __commonJS({
       return inputs.map((input) => input.trim());
     }
     exports.getMultilineInput = getMultilineInput;
-    function getBooleanInput(name, options) {
+    function getBooleanInput2(name, options) {
       const trueValue = ["true", "True", "TRUE"];
       const falseValue = ["false", "False", "FALSE"];
       const val = getInput2(name, options);
@@ -18758,13 +18758,13 @@ var require_core = __commonJS({
       throw new TypeError(`Input does not meet YAML 1.2 "Core Schema" specification: ${name}
 Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     }
-    exports.getBooleanInput = getBooleanInput;
+    exports.getBooleanInput = getBooleanInput2;
     function setOutput(name, value) {
       const filePath = process.env["GITHUB_OUTPUT"] || "";
       if (filePath) {
         return file_command_1.issueFileCommand("OUTPUT", file_command_1.prepareKeyValueMessage(name, value));
       }
-      process.stdout.write(os.EOL);
+      process.stdout.write(os2.EOL);
       command_1.issueCommand("set-output", { name }, utils_1.toCommandValue(value));
     }
     exports.setOutput = setOutput;
@@ -18774,21 +18774,21 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     exports.setCommandEcho = setCommandEcho;
     function setFailed2(message) {
       process.exitCode = ExitCode.Failure;
-      error(message);
+      error2(message);
     }
     exports.setFailed = setFailed2;
     function isDebug() {
       return process.env["RUNNER_DEBUG"] === "1";
     }
     exports.isDebug = isDebug;
-    function debug2(message) {
+    function debug4(message) {
       command_1.issueCommand("debug", {}, message);
     }
-    exports.debug = debug2;
-    function error(message, properties = {}) {
+    exports.debug = debug4;
+    function error2(message, properties = {}) {
       command_1.issueCommand("error", utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
     }
-    exports.error = error;
+    exports.error = error2;
     function warning(message, properties = {}) {
       command_1.issueCommand("warning", utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
     }
@@ -18797,10 +18797,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       command_1.issueCommand("notice", utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
     }
     exports.notice = notice;
-    function info2(message) {
-      process.stdout.write(message + os.EOL);
+    function info3(message) {
+      process.stdout.write(message + os2.EOL);
     }
-    exports.info = info2;
+    exports.info = info3;
     function startGroup(name) {
       command_1.issue("group", name);
     }
@@ -19353,7 +19353,7 @@ var require_toolrunner = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.argStringToArray = exports.ToolRunner = void 0;
-    var os = __importStar(__require("os"));
+    var os2 = __importStar(__require("os"));
     var events = __importStar(__require("events"));
     var child = __importStar(__require("child_process"));
     var path = __importStar(__require("path"));
@@ -19408,12 +19408,12 @@ var require_toolrunner = __commonJS({
       _processLineBuffer(data, strBuffer, onLine) {
         try {
           let s = strBuffer + data.toString();
-          let n = s.indexOf(os.EOL);
+          let n = s.indexOf(os2.EOL);
           while (n > -1) {
             const line = s.substring(0, n);
             onLine(line);
-            s = s.substring(n + os.EOL.length);
-            n = s.indexOf(os.EOL);
+            s = s.substring(n + os2.EOL.length);
+            n = s.indexOf(os2.EOL);
           }
           return s;
         } catch (err) {
@@ -19582,7 +19582,7 @@ var require_toolrunner = __commonJS({
             }
             const optionsNonNull = this._cloneExecOptions(this.options);
             if (!optionsNonNull.silent && optionsNonNull.outStream) {
-              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os.EOL);
+              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os2.EOL);
             }
             const state = new ExecState(optionsNonNull, this.toolPath);
             state.on("debug", (message) => {
@@ -19646,7 +19646,7 @@ var require_toolrunner = __commonJS({
               this._debug(`STDIO streams have closed for tool '${this.toolPath}'`);
               state.CheckComplete();
             });
-            state.on("done", (error, exitCode) => {
+            state.on("done", (error2, exitCode) => {
               if (stdbuffer.length > 0) {
                 this.emit("stdline", stdbuffer);
               }
@@ -19654,8 +19654,8 @@ var require_toolrunner = __commonJS({
                 this.emit("errline", errbuffer);
               }
               cp.removeAllListeners();
-              if (error) {
-                reject(error);
+              if (error2) {
+                reject(error2);
               } else {
                 resolve(exitCode);
               }
@@ -19750,14 +19750,14 @@ var require_toolrunner = __commonJS({
         this.emit("debug", message);
       }
       _setResult() {
-        let error;
+        let error2;
         if (this.processExited) {
           if (this.processError) {
-            error = new Error(`There was an error when attempting to execute the process '${this.toolPath}'. This may indicate the process failed to start. Error: ${this.processError}`);
+            error2 = new Error(`There was an error when attempting to execute the process '${this.toolPath}'. This may indicate the process failed to start. Error: ${this.processError}`);
           } else if (this.processExitCode !== 0 && !this.options.ignoreReturnCode) {
-            error = new Error(`The process '${this.toolPath}' failed with exit code ${this.processExitCode}`);
+            error2 = new Error(`The process '${this.toolPath}' failed with exit code ${this.processExitCode}`);
           } else if (this.processStderr && this.options.failOnStdErr) {
-            error = new Error(`The process '${this.toolPath}' failed because one or more lines were written to the STDERR stream`);
+            error2 = new Error(`The process '${this.toolPath}' failed because one or more lines were written to the STDERR stream`);
           }
         }
         if (this.timeout) {
@@ -19765,7 +19765,7 @@ var require_toolrunner = __commonJS({
           this.timeout = null;
         }
         this.done = true;
-        this.emit("done", error, this.processExitCode);
+        this.emit("done", error2, this.processExitCode);
       }
       static HandleTimeout(state) {
         if (state.done) {
@@ -19894,69 +19894,291 @@ var require_exec = __commonJS({
 });
 
 // src/index.ts
-var core = __toESM(require_core(), 1);
+var core3 = __toESM(require_core(), 1);
 var exec = __toESM(require_exec(), 1);
+import os from "node:os";
 import process2 from "node:process";
-var POLYFILLS = {
-  curl: "sudo apt-get install -y --no-install-recommends curl",
-  // This script will error because the node environment is not set up yet.
-  yarn: 'curl -o- -L https://yarnpkg.com/install.sh | bash || true && echo "$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH" >> $GITHUB_PATH',
-  git: "sudo apt-get install -y --no-install-recommends git",
-  jq: "sudo apt-get install -y --no-install-recommends jq"
+
+// src/constants.ts
+var core = __toESM(require_core(), 1);
+var DEFAULT_EXEC_LISTENERS = {
+  stdout: (data) => {
+    core.debug(data.toString());
+  },
+  stderr: (data) => {
+    core.error(data.toString());
+  }
 };
-try {
-  const platform = process2.platform;
-  if (platform !== "linux") {
-    throw new Error(`Unsupported platform: ${platform}`);
+var POLYFILLS = {
+  "ant-optional": { default: false, needs: [], aptPackage: "ant-optional" },
+  "build-essential": { default: true, needs: [], aptPackage: "build-essential" },
+  "ca-certificates": { default: true, needs: [], aptPackage: "ca-certificates" },
+  "dpkg-dev": { default: true, needs: [], aptPackage: "dpkg-dev" },
+  "fonts-noto-color-emoji": { default: false, needs: [], aptPackage: "fonts-noto-color-emoji" },
+  "g++": { default: true, needs: [], aptPackage: "g++" },
+  "iputils-ping": { default: false, needs: [], aptPackage: "iputils-ping" },
+  "libffi-dev": { default: true, needs: [], aptPackage: "libffi-dev" },
+  "libgbm-dev": { default: true, needs: [], aptPackage: "libgbm-dev" },
+  "libgconf-2-4": { default: true, needs: [], aptPackage: "libgconf-2-4" },
+  "libgsl-dev": { default: true, needs: [], aptPackage: "libgsl-dev" },
+  "libmagic-dev": { default: true, needs: [], aptPackage: "libmagic-dev" },
+  "libmagickcore-dev": { default: true, needs: [], aptPackage: "libmagickcore-dev" },
+  "libmagickwand-dev": { default: true, needs: [], aptPackage: "libmagickwand-dev" },
+  "libsecret-1-dev": { default: true, needs: [], aptPackage: "libsecret-1-dev" },
+  "libsqlite3-dev": { default: true, needs: [], aptPackage: "libsqlite3-dev" },
+  "libssl-dev": { default: true, needs: [], aptPackage: "libssl-dev" },
+  "libxkbfile-dev": { default: true, needs: [], aptPackage: "libxkbfile-dev" },
+  "libyaml-dev": { default: true, needs: [], aptPackage: "libyaml-dev" },
+  "net-tools": { default: false, needs: [], aptPackage: "net-tools" },
+  'openjdk-17-jre-headless"': { default: false, needs: [], aptPackage: 'openjdk-17-jre-headless"' },
+  "openssh-client": { default: false, needs: [], aptPackage: "openssh-client" },
+  "p7zip-full": { default: false, needs: [], aptPackage: "p7zip-full" },
+  "p7zip-rar": { default: false, needs: [], aptPackage: "p7zip-rar" },
+  "pkg-config": { default: true, needs: [], aptPackage: "pkg-config" },
+  "python-is-python3": { default: false, needs: [], aptPackage: "python-is-python3" },
+  "python3-dev": { default: false, needs: [], aptPackage: "python3-dev" },
+  "python3-pip": { default: false, needs: [], aptPackage: "python3-pip" },
+  "python3-venv": { default: false, needs: [], aptPackage: "python3-venv" },
+  "xz-utils": { default: false, needs: [], aptPackage: "xz-utils" },
+  acl: { default: false, needs: [], aptPackage: "acl" },
+  ant: { default: false, needs: [], aptPackage: "ant" },
+  aria2: { default: false, needs: [], aptPackage: "aria2" },
+  autoconf: { default: false, needs: [], aptPackage: "autoconf" },
+  automake: { default: false, needs: [], aptPackage: "automake" },
+  binutils: { default: false, needs: [], aptPackage: "binutils" },
+  bison: { default: false, needs: [], aptPackage: "bison" },
+  brotli: { default: true, needs: [], aptPackage: "brotli" },
+  bzip2: { default: false, needs: [], aptPackage: "bzip2" },
+  coreutils: { default: true, needs: [], aptPackage: "coreutils" },
+  curl: { default: true, needs: [], aptPackage: "curl" },
+  dbus: { default: false, needs: [], aptPackage: "dbus" },
+  dnsutils: { default: false, needs: [], aptPackage: "dnsutils" },
+  dpkg: { default: true, needs: [], aptPackage: "dpkg" },
+  fakeroot: { default: false, needs: [], aptPackage: "fakeroot" },
+  file: { default: false, needs: [], aptPackage: "file" },
+  flex: { default: false, needs: [], aptPackage: "flex" },
+  ftp: { default: false, needs: [], aptPackage: "ftp" },
+  gcc: { default: true, needs: [], aptPackage: "gcc" },
+  gnupg: { default: true, needs: [], aptPackage: "gnupg" },
+  gnupg2: { default: true, needs: [], aptPackage: "gnupg2" },
+  haveged: { default: false, needs: [], aptPackage: "haveged" },
+  imagemagick: { default: false, needs: [], aptPackage: "imagemagick" },
+  iproute2: { default: false, needs: [], aptPackage: "iproute2" },
+  jq: { default: true, needs: [], aptPackage: "jq" },
+  kmod: { default: false, needs: [], aptPackage: "kmod" },
+  lib32z1: { default: true, needs: [], aptPackage: "lib32z1" },
+  libcurl4: { default: true, needs: [], aptPackage: "libcurl4" },
+  libtool: { default: true, needs: [], aptPackage: "libtool" },
+  libunwind8: { default: true, needs: [], aptPackage: "libunwind8" },
+  libxss1: { default: true, needs: [], aptPackage: "libxss1" },
+  locales: { default: false, needs: [], aptPackage: "locales" },
+  lz4: { default: false, needs: [], aptPackage: "lz4" },
+  m4: { default: false, needs: [], aptPackage: "m4" },
+  make: { default: true, needs: [], aptPackage: "make" },
+  mediainfo: { default: false, needs: [], aptPackage: "mediainfo" },
+  mercurial: { default: false, needs: [], aptPackage: "mercurial" },
+  netcat: { default: false, needs: [], aptPackage: "netcat" },
+  nodejs: { default: false, needs: [], aptPackage: "nodejs" },
+  parallel: { default: false, needs: [], aptPackage: "parallel" },
+  pass: { default: false, needs: [], aptPackage: "pass" },
+  patchelf: { default: false, needs: [], aptPackage: "patchelf" },
+  pigz: { default: false, needs: [], aptPackage: "pigz" },
+  pollinate: { default: false, needs: [], aptPackage: "pollinate" },
+  python3: { default: false, needs: [], aptPackage: "python3" },
+  rpm: { default: false, needs: [], aptPackage: "rpm" },
+  rsync: { default: false, needs: [], aptPackage: "rsync" },
+  shellcheck: { default: false, needs: [], aptPackage: "shellcheck" },
+  sphinxsearch: { default: false, needs: [], aptPackage: "sphinxsearch" },
+  sqlite3: { default: false, needs: [], aptPackage: "sqlite3" },
+  ssh: { default: true, needs: [], aptPackage: "ssh" },
+  sshpass: { default: false, needs: [], aptPackage: "sshpass" },
+  subversion: { default: false, needs: [], aptPackage: "subversion" },
+  sudo: { default: true, needs: [], aptPackage: "sudo" },
+  swig: { default: false, needs: [], aptPackage: "swig" },
+  tar: { default: true, needs: [], aptPackage: "tar" },
+  telnet: { default: false, needs: [], aptPackage: "telnet" },
+  texinfo: { default: false, needs: [], aptPackage: "texinfo" },
+  time: { default: false, needs: [], aptPackage: "time" },
+  tk: { default: false, needs: [], aptPackage: "tk" },
+  tzdata: { default: false, needs: [], aptPackage: "tzdata" },
+  uidmap: { default: false, needs: [], aptPackage: "uidmap" },
+  unzip: { default: true, needs: [], aptPackage: "unzip" },
+  upx: { default: false, needs: [], aptPackage: "upx" },
+  wget: { default: true, needs: [], aptPackage: "wget" },
+  xorriso: { default: false, needs: [], aptPackage: "xorriso" },
+  xvfb: { default: false, needs: [], aptPackage: "xvfb" },
+  zip: { default: true, needs: [], aptPackage: "zip" },
+  zsync: { default: false, needs: [], aptPackage: "zsync" },
+  yarn: {
+    default: true,
+    needs: ["curl"],
+    path: "$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH",
+    command: "curl -o- -L https://yarnpkg.com/install.sh | bash || true"
   }
-  const ignoredModules = core.getInput("ignored").split(",").map((module) => module.trim());
-  if (ignoredModules.length === Object.keys(POLYFILLS).length) {
-    throw new Error("All polyfills are ignored. Please check your configuration.");
-  }
-  if (ignoredModules.includes("curl") && !ignoredModules.includes("yarn")) {
-    core.info("curl is required for yarn. Adding yarn to ignored modules...");
-    ignoredModules.push("yarn");
-  }
-  core.debug("Installing dependencies...");
-  await exec.exec("sudo apt-get update", void 0, {
-    listeners: {
-      stdout: (data) => {
-        core.info(data.toString());
-      },
-      stderr: (data) => {
-        core.info(data.toString());
-      }
-    }
-  });
-  for (const [polyfill, polyfillCommand] of Object.entries(POLYFILLS)) {
-    if (ignoredModules.includes(polyfill)) {
-      core.info(`Skipping ${polyfill} polyfill...`);
+};
+
+// src/utils/parseModulesToInstall.ts
+var core2 = __toESM(require_core(), 1);
+function parseModulesToInstall({
+  ignore,
+  include,
+  skipDefaults
+}) {
+  const ALL_POLYFILLS = Object.entries(POLYFILLS);
+  const ignoreSet = new Set(ignore);
+  core2.info(`Ignored modules: ${Array.from(ignoreSet).join(", ")}`);
+  const includeSet = new Set(include);
+  core2.info(`Included modules: ${Array.from(includeSet).join(", ")}`);
+  core2.info(`Skip defaults: ${skipDefaults}`);
+  const modulesToInstall = [];
+  for (const [polyfill, polyfillOptions] of ALL_POLYFILLS) {
+    if (ignoreSet.has(polyfill)) {
+      core2.debug(`Skipping ${polyfill} polyfill because it is ignored.`);
       continue;
     }
-    core.info(`Running ${polyfill} polyfill...`);
-    const prefixedCommand = ["bash", "-c", polyfillCommand];
-    const code = await exec.exec(prefixedCommand[0], [prefixedCommand[1], prefixedCommand[2]], {
-      listeners: {
-        stdout: (data) => {
-          core.info(data.toString());
-        },
-        stderr: (data) => {
-          core.info(data.toString());
-        }
-      }
-    });
-    if (code !== 0) {
-      throw new Error(`Polyfill ${polyfill} failed with exit code ${code}.`);
+    if (includeSet.has(polyfill)) {
+      core2.debug(`Including ${polyfill} polyfill because it is included.`);
+      modulesToInstall.push([polyfill, polyfillOptions]);
+      continue;
     }
+    if (skipDefaults || !polyfillOptions.default) {
+      core2.debug(
+        skipDefaults ? `Skipping ${polyfill} polyfill because it is not included and skipDefaults is true.` : `Skipping ${polyfill} polyfill because it is not a default polyfill.`
+      );
+      continue;
+    }
+    core2.debug(`Including ${polyfill} polyfill because it is a default polyfill.`);
+    modulesToInstall.push([polyfill, polyfillOptions]);
   }
-} catch (error) {
-  core.debug(String(error));
-  if (error.message) {
-    core.setFailed(error.message);
-  } else {
-    core.setFailed("An unexpected error occurred. Please contact the package maintainer if the problem persists.");
+  core2.debug(`Modules to install: ${modulesToInstall.map(([polyfill]) => polyfill).join(", ")}`);
+  return modulesToInstall;
+}
+
+// src/structures/ValidationError.ts
+var ValidationError = class extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "ValidationError";
+  }
+};
+
+// src/utils/validate.ts
+function validateInputs({
+  ignore,
+  include,
+  skipDefaults
+}) {
+  if (skipDefaults && include.length === 0) {
+    throw new ValidationError("Cannot skip defaults without including any polyfills.");
+  }
+  if (ignore.length >= Object.keys(POLYFILLS).length) {
+    throw new ValidationError("Cannot ignore all polyfills.");
+  }
+  validatePackageNames(ignore, "ignored");
+  validatePackageNames(include, "includes");
+}
+function validatePackageNames(packages, source) {
+  const unknownPolyfills = packages.filter((packageName) => !POLYFILLS[packageName]);
+  if (unknownPolyfills.length > 0) {
+    throw new ValidationError(`Unknown polyfills on ${source}: ${unknownPolyfills.join(", ")}`);
   }
 }
+function validatePolyfillNeeds(modulesToInstall) {
+  const polyfillNeeds = modulesToInstall.reduce((acc, [polyfill, polyfillOptions]) => {
+    if (!polyfillOptions.needs?.length)
+      return acc;
+    const polyfillNeeds2 = polyfillOptions.needs.map((polyfillNeed) => ({
+      need: polyfillNeed,
+      requiredBy: polyfill
+    }));
+    return [...acc, ...polyfillNeeds2];
+  }, []);
+  const modulesToInstallMap = new Map(modulesToInstall);
+  const missingModules = polyfillNeeds.filter((polyfill) => !modulesToInstallMap.has(polyfill.need));
+  if (missingModules.length > 0) {
+    throw new ValidationError(
+      `Missing polyfills needed by other polyfills: ${missingModules.map(({ need, requiredBy }) => `${need} (Required by: ${requiredBy})`).join(", ")}`
+    );
+  }
+}
+
+// src/index.ts
+async function main() {
+  const IGNORE = core3.getInput("ignored")?.split(",").map((module) => module.trim()).filter(Boolean) ?? [];
+  const INCLUDES = core3.getInput("includes")?.split(",").map((module) => module.trim()).filter(Boolean) ?? [];
+  const SKIP_DEFAULTS = core3.getBooleanInput("skip-defaults") ?? false;
+  try {
+    const platform = os.platform();
+    if (platform !== "linux") {
+      throw new Error(`Unsupported platform: ${platform}`);
+    }
+    core3.debug("Validating inputs...");
+    validateInputs({ ignore: IGNORE, include: INCLUDES, skipDefaults: SKIP_DEFAULTS });
+    core3.debug("Installing dependencies...");
+    const updateCode = await exec.exec("sudo", ["apt-get", "update", "-y"], {
+      listeners: DEFAULT_EXEC_LISTENERS
+    });
+    if (updateCode !== 0) {
+      throw new Error(`Apt update failed with exit code ${updateCode}.`);
+    }
+    const modulesToInstall = parseModulesToInstall({ ignore: IGNORE, include: INCLUDES, skipDefaults: SKIP_DEFAULTS });
+    validatePolyfillNeeds(modulesToInstall);
+    const aptModulesToInstall = modulesToInstall.filter(([, polyfill]) => polyfill.aptPackage);
+    if (aptModulesToInstall.length > 0) {
+      core3.info(`Installing ${aptModulesToInstall.length} apt packages...`);
+      const code = await exec.exec(
+        "sudo",
+        [
+          "apt-get",
+          "install",
+          "-y",
+          "--no-install-recommends",
+          ...aptModulesToInstall.map(([, polyfill]) => polyfill.aptPackage)
+        ],
+        {
+          listeners: DEFAULT_EXEC_LISTENERS
+        }
+      );
+      if (code !== 0) {
+        throw new Error(`Apt failed with exit code ${code}.`);
+      }
+      core3.info("Successfully installed apt packages.");
+    }
+    const nonAptModulesToInstall = modulesToInstall.filter(([, polyfill]) => polyfill.command);
+    for (const [polyfill, polyfillOptions] of nonAptModulesToInstall) {
+      core3.info(`Installing ${polyfill} polyfill...`);
+      const prefixedCommand = ["/bin/bash", "-c", polyfillOptions.command];
+      const code = await exec.exec(prefixedCommand[0], [prefixedCommand[1], prefixedCommand[2]], {
+        listeners: DEFAULT_EXEC_LISTENERS
+      });
+      if (polyfillOptions.path) {
+        core3.addPath(polyfillOptions.path);
+        core3.info(`Added ${polyfill} polyfill to PATH.`);
+      }
+      if (code !== 0) {
+        throw new Error(`Polyfill ${polyfill} failed with exit code ${code}.`);
+      }
+      core3.info(`Successfully installed ${polyfill} polyfill.`);
+    }
+    await exec.exec("sudo", ["apt-get", "autoremove", "-y"], {
+      listeners: DEFAULT_EXEC_LISTENERS
+    });
+    core3.info("Successfully installed all polyfills.");
+  } catch (error2) {
+    core3.debug(String(error2));
+    if (error2.message) {
+      core3.setFailed(error2.message);
+    } else {
+      core3.setFailed("An unexpected error occurred. Please contact the package maintainer if the problem persists.");
+    }
+  }
+}
+if (process2.env.NODE_ENV !== "test") {
+  await main();
+}
+export {
+  main
+};
 /*! Bundled license information:
 
 undici/lib/fetch/body.js:
