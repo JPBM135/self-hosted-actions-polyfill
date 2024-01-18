@@ -8,6 +8,6 @@ fi
 
 yarn build
 git add --all
-git commit -m "Release $VERSION" --allow-empty
-git tag $VERSION -m "Release $VERSION"
+git commit -m "feat(release): release $VERSION" --allow-empty
+git tag $VERSION -m "feat(release): release $VERSION"
 git push --follow-tags
