@@ -20104,9 +20104,12 @@ function validatePolyfillNeeds(modulesToInstall) {
 
 // src/index.ts
 async function main() {
-  const IGNORE = core3.getInput("ignored")?.split(",").map((module) => module.trim()).filter(Boolean) ?? [];
-  const INCLUDES = core3.getInput("includes")?.split(",").map((module) => module.trim()).filter(Boolean) ?? [];
-  const SKIP_DEFAULTS = core3.getBooleanInput("skip-defaults") ?? false;
+  const IGNORE = core3.getInput("ignored", { required: false, trimWhitespace: true })?.split(",").filter(Boolean) ?? [];
+  const INCLUDES = core3.getInput("includes", { required: false, trimWhitespace: true })?.split(",").filter(Boolean) ?? [];
+  const SKIP_DEFAULTS = core3.getInput("skip-defaults") ? core3.getBooleanInput("skip-defaults", {
+    required: false,
+    trimWhitespace: true
+  }) : false;
   try {
     const platform = os.platform();
     if (platform !== "linux") {
