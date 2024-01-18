@@ -135,7 +135,7 @@ describe('Self-Hosted Actions Polyfill', () => {
     expect(exec.exec).toHaveBeenLastCalledWith('sudo', ['apt-get', 'autoremove', '-y'], expect.anything());
   });
 
-  it('should run without errors if the skip-defaults is true and includes as curl', async () => {
+  it('should run without errors if the skip-defaults is true and include as curl', async () => {
     vitest.mocked(platform).mockReturnValue('linux');
 
     vitest.mocked(core).getInput.mockImplementation((name: string): string => {
@@ -143,7 +143,7 @@ describe('Self-Hosted Actions Polyfill', () => {
         return 'true';
       }
 
-      if (name === 'includes') {
+      if (name === 'include') {
         return 'curl';
       }
 

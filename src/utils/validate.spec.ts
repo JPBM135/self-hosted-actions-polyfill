@@ -40,7 +40,7 @@ describe('validateInputs', () => {
 
   it('should throw an error if an included polyfill is unknown', () => {
     expect(() => validateInputs({ ignore: [], include: ['unknown'], skipDefaults: false })).toThrow(
-      'Unknown polyfills on includes: unknown',
+      'Unknown polyfills on include: unknown',
     );
   });
 });

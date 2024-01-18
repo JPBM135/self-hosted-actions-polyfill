@@ -10,8 +10,7 @@ import { validateInputs, validatePolyfillNeeds } from './utils/validate.js';
 
 export async function main() {
   const IGNORE = core.getInput('ignored', { required: false, trimWhitespace: true })?.split(',').filter(Boolean) ?? [];
-  const INCLUDES =
-    core.getInput('includes', { required: false, trimWhitespace: true })?.split(',').filter(Boolean) ?? [];
+  const INCLUDE = core.getInput('include', { required: false, trimWhitespace: true })?.split(',').filter(Boolean) ?? [];
   const SKIP_DEFAULTS = core.getInput('skip-defaults')
     ? core.getBooleanInput('skip-defaults', {
         required: false,
@@ -21,7 +20,7 @@ export async function main() {
   const RUN_IN_BAND = core.getInput('run-in-band') ? core.getBooleanInput('run-in-band') : false;
 
   try {
-    core.debug(`Inputs: ${JSON.stringify({ IGNORE, INCLUDES, SKIP_DEFAULTS, RUN_IN_BAND }, null, 2)}`);
+    core.debug(`Inputs: ${JSON.stringify({ IGNORE, INCLUDE, SKIP_DEFAULTS, RUN_IN_BAND }, null, 2)}`);
 
     const platform = os.platform();
     const promises: Promise<void>[] = [];
@@ -31,7 +30,7 @@ export async function main() {
     }
 
     core.debug('Validating inputs...');
-    validateInputs({ ignore: IGNORE, include: INCLUDES, skipDefaults: SKIP_DEFAULTS });
+    validateInputs({ ignore: IGNORE, include: INCLUDE, skipDefaults: SKIP_DEFAULTS });
 
     core.debug('Installing dependencies...');
     const updateCode = await exec.exec('sudo', ['apt-get', 'update', '-y'], {
@@ -42,7 +41,7 @@ export async function main() {
       throw new Error(`Apt update failed with exit code ${updateCode}.`);
     }
 
-    const modulesToInstall = parseModulesToInstall({ ignore: IGNORE, include: INCLUDES, skipDefaults: SKIP_DEFAULTS });
+    const modulesToInstall = parseModulesToInstall({ ignore: IGNORE, include: INCLUDE, skipDefaults: SKIP_DEFAULTS });
 
     validatePolyfillNeeds(modulesToInstall);
 

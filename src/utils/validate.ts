@@ -20,7 +20,7 @@ export function validateInputs({
   }
 
   validatePackageNames(ignore, 'ignored');
-  validatePackageNames(include, 'includes');
+  validatePackageNames(include, 'include');
 }
 
 export function validatePackageNames(packages: string[], source: string): void {
