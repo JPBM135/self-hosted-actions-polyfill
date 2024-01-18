@@ -19929,6 +19929,7 @@ var POLYFILLS = {
   "dpkg-dev": { default: true, needs: [], aptPackage: "dpkg-dev" },
   "fonts-noto-color-emoji": { default: false, needs: [], aptPackage: "fonts-noto-color-emoji" },
   "g++": { default: true, needs: [], aptPackage: "g++" },
+  "gnome-terminal": { default: true, needs: [], aptPackage: "gnome-terminal" },
   "iputils-ping": { default: false, needs: [], aptPackage: "iputils-ping" },
   "libffi-dev": { default: true, needs: [], aptPackage: "libffi-dev" },
   "libgbm-dev": { default: true, needs: [], aptPackage: "libgbm-dev" },
@@ -20026,6 +20027,27 @@ var POLYFILLS = {
     needs: ["curl"],
     path: "$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH",
     command: "curl -o- -L https://yarnpkg.com/install.sh | bash || true"
+  },
+  docker: {
+    default: true,
+    needs: ["gnome-terminal", "curl", "gnupg", "ca-certificates"],
+    command: [
+      "sudo install -m 0755 -d /etc/apt/keyrings",
+      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg",
+      "sudo chmod a+r /etc/apt/keyrings/docker.gpg",
+      'echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null',
+      "sudo apt-get update",
+      "sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
+    ].join(" && ")
+  },
+  "aws-cli": {
+    default: true,
+    needs: [],
+    command: [
+      'curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"',
+      "unzip awscliv2.zip",
+      "sudo ./aws/install"
+    ].join(" && ")
   }
 };
 
