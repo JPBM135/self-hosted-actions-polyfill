@@ -2,6 +2,7 @@ name: 'Self-Hosted Action Polyfill'
 description: 'Loads packages and libs that should be available in all hosted actions but aren`t in self-hosted'
 icon: 'battery-charging'
 color: 'gray-dark'
+author: 'github.com/JPBM135'
 
 input:
   ignore:
