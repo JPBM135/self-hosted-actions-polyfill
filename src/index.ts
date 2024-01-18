@@ -77,7 +77,12 @@ export async function main() {
       });
 
       if (polyfillOptions.path) {
-        core.addPath(polyfillOptions.path);
+        const escapedPath = polyfillOptions.path.replaceAll('"', '\\"');
+
+        await exec.exec('/bin/bash', ['-c', `echo "${escapedPath}" >> $GITHUB_PATH`], {
+          ...createStreams(),
+        });
+
         core.info(`Added ${polyfill} polyfill to PATH.`);
       }
 

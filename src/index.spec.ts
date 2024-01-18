@@ -33,7 +33,7 @@ describe('Self-Hosted Actions Polyfill', () => {
     await main();
 
     expect(core.setFailed).not.toHaveBeenCalled();
-    expect(exec.exec).toHaveBeenCalledTimes(4);
+    expect(exec.exec).toHaveBeenCalledTimes(5);
 
     expect(exec.exec).toHaveBeenCalledWith('sudo', ['apt-get', 'update', '-y'], expect.anything());
 
@@ -53,9 +53,13 @@ describe('Self-Hosted Actions Polyfill', () => {
 
     expect(exec.exec).toHaveBeenCalledWith('/bin/bash', ['-c', POLYFILLS.yarn?.command], expect.anything());
 
-    expect(exec.exec).toHaveBeenLastCalledWith('sudo', ['apt-get', 'autoremove', '-y'], expect.anything());
+    expect(exec.exec).toHaveBeenCalledWith(
+      '/bin/bash',
+      ['-c', `echo "${POLYFILLS.yarn.path}" >> $GITHUB_PATH`],
+      expect.anything(),
+    );
 
-    expect(core.addPath).toHaveBeenCalledWith(POLYFILLS.yarn.path!);
+    expect(exec.exec).toHaveBeenLastCalledWith('sudo', ['apt-get', 'autoremove', '-y'], expect.anything());
   });
 
   it('should throw an error if the platform is not supported', async () => {
