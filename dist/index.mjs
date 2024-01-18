@@ -18718,7 +18718,7 @@ var require_core = __commonJS({
       command_1.issueCommand("add-mask", {}, secret);
     }
     exports.setSecret = setSecret;
-    function addPath2(inputPath) {
+    function addPath(inputPath) {
       const filePath = process.env["GITHUB_PATH"] || "";
       if (filePath) {
         file_command_1.issueFileCommand("PATH", inputPath);
@@ -18727,7 +18727,7 @@ var require_core = __commonJS({
       }
       process.env["PATH"] = `${inputPath}${path.delimiter}${process.env["PATH"]}`;
     }
-    exports.addPath = addPath2;
+    exports.addPath = addPath;
     function getInput2(name, options) {
       const val = process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] || "";
       if (options && options.required && !val) {
@@ -20166,7 +20166,10 @@ async function main() {
         ...createStreams()
       });
       if (polyfillOptions.path) {
-        core3.addPath(polyfillOptions.path);
+        const escapedPath = polyfillOptions.path.replaceAll('"', '\\"');
+        await exec.exec("/bin/bash", ["-c", `echo "${escapedPath}" >> $GITHUB_PATH`], {
+          ...createStreams()
+        });
         core3.info(`Added ${polyfill} polyfill to PATH.`);
       }
       if (code !== 0) {
