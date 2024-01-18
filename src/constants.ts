@@ -1,15 +1,4 @@
-import type { Buffer } from 'node:buffer';
-import * as core from '@actions/core';
 import type { PolyfillKey, PolyfillLib } from './types/polyfills.js';
-
-export const DEFAULT_EXEC_LISTENERS = {
-  stdout: (data: Buffer) => {
-    core.debug(data.toString());
-  },
-  stderr: (data: Buffer) => {
-    core.error(data.toString());
-  },
-};
 
 export const POLYFILLS: Record<PolyfillKey, PolyfillLib> = {
   'ant-optional': { default: false, needs: [], aptPackage: 'ant-optional' },

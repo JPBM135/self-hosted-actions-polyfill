@@ -1,17 +1,15 @@
-import { describe, it, expect, beforeAll, vitest } from 'vitest';
+import { describe, it, expect, vitest } from 'vitest';
 import { POLYFILLS } from '../constants.js';
 import { validateInputs, validatePackageNames, validatePolyfillNeeds } from './validate.js';
 
-beforeAll(() => {
-  vitest.mock(
-    '@actions/core',
-    () =>
-      ({
-        debug: vitest.fn(),
-        info: vitest.fn(),
-      }) as any,
-  );
-});
+vitest.mock(
+  '@actions/core',
+  () =>
+    ({
+      debug: vitest.fn(),
+      info: vitest.fn(),
+    }) as any,
+);
 
 describe('validateInputs', () => {
   it('should throw an error if skipDefaults is true and include is empty', () => {

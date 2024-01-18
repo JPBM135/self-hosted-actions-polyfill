@@ -1,18 +1,16 @@
-import { describe, it, expect, vitest, beforeAll } from 'vitest';
+import { describe, it, expect, vitest } from 'vitest';
 import { POLYFILLS } from '../constants.js';
 import type { PolyfillKey, PolyfillLib } from '../types/polyfills.js';
 import { parseModulesToInstall } from './parseModulesToInstall.js';
 
-beforeAll(() => {
-  vitest.mock(
-    '@actions/core',
-    () =>
-      ({
-        debug: vitest.fn(),
-        info: vitest.fn(),
-      }) as any,
-  );
-});
+vitest.mock(
+  '@actions/core',
+  () =>
+    ({
+      debug: vitest.fn(),
+      info: vitest.fn(),
+    }) as any,
+);
 
 function sortPolyfills(polyfills: [PolyfillKey | string, PolyfillLib][]): [PolyfillKey, PolyfillLib][] {
   return polyfills.sort((a, b) => a[0].localeCompare(b[0])) as [PolyfillKey, PolyfillLib][];

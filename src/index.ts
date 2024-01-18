@@ -2,7 +2,7 @@ import os from 'node:os';
 import process from 'node:process';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import { DEFAULT_EXEC_LISTENERS } from './constants.js';
+import { createStreams } from './utils/createStreams.js';
 import { parseModulesToInstall } from './utils/parseModulesToInstall.js';
 import { validateInputs, validatePolyfillNeeds } from './utils/validate.js';
 
@@ -29,7 +29,7 @@ export async function main() {
 
     core.debug('Installing dependencies...');
     const updateCode = await exec.exec('sudo', ['apt-get', 'update', '-y'], {
-      listeners: DEFAULT_EXEC_LISTENERS,
+      ...createStreams(),
     });
 
     if (updateCode !== 0) {
@@ -55,7 +55,7 @@ export async function main() {
           ...aptModulesToInstall.map(([, polyfill]) => polyfill.aptPackage!),
         ],
         {
-          listeners: DEFAULT_EXEC_LISTENERS,
+          ...createStreams(),
         },
       );
 
@@ -73,7 +73,7 @@ export async function main() {
       const prefixedCommand: [string, string, string] = ['/bin/bash', '-c', polyfillOptions.command!];
 
       const code = await exec.exec(prefixedCommand[0], [prefixedCommand[1], prefixedCommand[2]], {
-        listeners: DEFAULT_EXEC_LISTENERS,
+        ...createStreams(),
       });
 
       if (polyfillOptions.path) {
@@ -89,7 +89,7 @@ export async function main() {
     }
 
     await exec.exec('sudo', ['apt-get', 'autoremove', '-y'], {
-      listeners: DEFAULT_EXEC_LISTENERS,
+      ...createStreams(),
     });
 
     core.info('Successfully installed all polyfills.');
