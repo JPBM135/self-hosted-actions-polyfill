@@ -7,19 +7,15 @@ import { parseModulesToInstall } from './utils/parseModulesToInstall.js';
 import { validateInputs, validatePolyfillNeeds } from './utils/validate.js';
 
 export async function main() {
-  const IGNORE =
-    core
-      .getInput('ignored')
-      ?.split(',')
-      .map((module) => module.trim())
-      .filter(Boolean) ?? [];
+  const IGNORE = core.getInput('ignored', { required: false, trimWhitespace: true })?.split(',').filter(Boolean) ?? [];
   const INCLUDES =
-    core
-      .getInput('includes')
-      ?.split(',')
-      .map((module) => module.trim())
-      .filter(Boolean) ?? [];
-  const SKIP_DEFAULTS = core.getBooleanInput('skip-defaults') ?? false;
+    core.getInput('includes', { required: false, trimWhitespace: true })?.split(',').filter(Boolean) ?? [];
+  const SKIP_DEFAULTS = core.getInput('skip-defaults')
+    ? core.getBooleanInput('skip-defaults', {
+        required: false,
+        trimWhitespace: true,
+      })
+    : false;
 
   try {
     const platform = os.platform();
