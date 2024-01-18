@@ -19899,28 +19899,6 @@ var exec = __toESM(require_exec(), 1);
 import os from "node:os";
 import process2 from "node:process";
 
-// src/utils/createStreams.ts
-var core = __toESM(require_core(), 1);
-import { Writable } from "node:stream";
-function createStreams() {
-  const stdout = new Writable({
-    write(chunk, __, callback) {
-      core.debug(chunk.toString());
-      callback();
-    }
-  });
-  const stderr = new Writable({
-    write(chunk, __, callback) {
-      core.error(chunk.toString());
-      callback();
-    }
-  });
-  return { outStream: stdout, errStream: stderr };
-}
-
-// src/utils/parseModulesToInstall.ts
-var core2 = __toESM(require_core(), 1);
-
 // src/constants.ts
 var POLYFILLS = {
   "ant-optional": { default: false, needs: [], aptPackage: "ant-optional" },
@@ -20051,7 +20029,27 @@ var POLYFILLS = {
   }
 };
 
+// src/utils/createStreams.ts
+var core = __toESM(require_core(), 1);
+import { Writable } from "node:stream";
+function createStreams() {
+  const stdout = new Writable({
+    write(chunk, __, callback) {
+      core.debug(chunk.toString());
+      callback();
+    }
+  });
+  const stderr = new Writable({
+    write(chunk, __, callback) {
+      core.error(chunk.toString());
+      callback();
+    }
+  });
+  return { outStream: stdout, errStream: stderr };
+}
+
 // src/utils/parseModulesToInstall.ts
+var core2 = __toESM(require_core(), 1);
 function parseModulesToInstall({
   ignore,
   include,
@@ -20108,7 +20106,7 @@ function validateInputs({
     throw new ValidationError("Cannot ignore all polyfills.");
   }
   validatePackageNames(ignore, "ignored");
-  validatePackageNames(include, "includes");
+  validatePackageNames(include, "include");
 }
 function validatePackageNames(packages, source) {
   const unknownPolyfills = packages.filter((packageName) => !POLYFILLS[packageName]);
@@ -20138,18 +20136,21 @@ function validatePolyfillNeeds(modulesToInstall) {
 // src/index.ts
 async function main() {
   const IGNORE = core3.getInput("ignored", { required: false, trimWhitespace: true })?.split(",").filter(Boolean) ?? [];
-  const INCLUDES = core3.getInput("includes", { required: false, trimWhitespace: true })?.split(",").filter(Boolean) ?? [];
+  const INCLUDE = core3.getInput("include", { required: false, trimWhitespace: true })?.split(",").filter(Boolean) ?? [];
   const SKIP_DEFAULTS = core3.getInput("skip-defaults") ? core3.getBooleanInput("skip-defaults", {
     required: false,
     trimWhitespace: true
   }) : false;
+  const RUN_IN_BAND = core3.getInput("run-in-band") ? core3.getBooleanInput("run-in-band") : false;
   try {
+    core3.debug(`Inputs: ${JSON.stringify({ IGNORE, INCLUDE, SKIP_DEFAULTS, RUN_IN_BAND }, null, 2)}`);
     const platform = os.platform();
+    const promises = [];
     if (platform !== "linux") {
       throw new Error(`Unsupported platform: ${platform}`);
     }
     core3.debug("Validating inputs...");
-    validateInputs({ ignore: IGNORE, include: INCLUDES, skipDefaults: SKIP_DEFAULTS });
+    validateInputs({ ignore: IGNORE, include: INCLUDE, skipDefaults: SKIP_DEFAULTS });
     core3.debug("Installing dependencies...");
     const updateCode = await exec.exec("sudo", ["apt-get", "update", "-y"], {
       ...createStreams()
@@ -20157,20 +20158,20 @@ async function main() {
     if (updateCode !== 0) {
       throw new Error(`Apt update failed with exit code ${updateCode}.`);
     }
-    const modulesToInstall = parseModulesToInstall({ ignore: IGNORE, include: INCLUDES, skipDefaults: SKIP_DEFAULTS });
+    const modulesToInstall = parseModulesToInstall({ ignore: IGNORE, include: INCLUDE, skipDefaults: SKIP_DEFAULTS });
     validatePolyfillNeeds(modulesToInstall);
-    const aptModulesToInstall = modulesToInstall.filter(([, polyfill]) => polyfill.aptPackage);
-    if (aptModulesToInstall.length > 0) {
-      core3.info(`Installing ${aptModulesToInstall.length} apt packages...`);
+    let aptModulesToInstall = modulesToInstall.filter(([, polyfill]) => polyfill.aptPackage);
+    const nonAptModulesToInstall = modulesToInstall.filter(([, polyfill]) => polyfill.command);
+    const needs = nonAptModulesToInstall.reduce((acc, [, cur]) => {
+      if (!cur.needs?.length)
+        return acc;
+      return [...acc, ...cur.needs];
+    }, []);
+    if (!RUN_IN_BAND && needs.length > 0) {
+      core3.info(`Installing ${needs.length} polyfills needed by other polyfills beforehand...`);
       const code = await exec.exec(
         "sudo",
-        [
-          "apt-get",
-          "install",
-          "-y",
-          "--no-install-recommends",
-          ...aptModulesToInstall.map(([, polyfill]) => polyfill.aptPackage)
-        ],
+        ["apt-get", "install", "-y", "--no-install-recommends", ...needs.map((need) => POLYFILLS[need].aptPackage)],
         {
           ...createStreams()
         }
@@ -20178,30 +20179,71 @@ async function main() {
       if (code !== 0) {
         throw new Error(`Apt failed with exit code ${code}.`);
       }
-      core3.info("Successfully installed apt packages.");
+      core3.debug(`Removing apt packages that are no longer needed: ${needs.join(", ")}`);
+      const needsSet = new Set(needs);
+      aptModulesToInstall = aptModulesToInstall.filter(([name]) => !needsSet.has(name));
+      core3.info("Successfully installed polyfills needed by other polyfills.");
     }
-    const nonAptModulesToInstall = modulesToInstall.filter(([, polyfill]) => polyfill.command);
+    if (aptModulesToInstall.length > 0) {
+      const installAptPackages = async () => {
+        core3.info(`Installing ${aptModulesToInstall.length} apt packages...`);
+        const code = await exec.exec(
+          "sudo",
+          [
+            "apt-get",
+            "install",
+            "-y",
+            "--no-install-recommends",
+            ...aptModulesToInstall.map(([, polyfill]) => polyfill.aptPackage)
+          ],
+          {
+            ...createStreams()
+          }
+        );
+        if (code !== 0) {
+          throw new Error(`Apt failed with exit code ${code}.`);
+        }
+        core3.info("Successfully installed apt packages.");
+      };
+      if (RUN_IN_BAND) {
+        await installAptPackages();
+      } else {
+        promises.push(installAptPackages());
+      }
+    }
     for (const [polyfill, polyfillOptions] of nonAptModulesToInstall) {
-      core3.info(`Installing ${polyfill} polyfill...`);
-      const prefixedCommand = ["/bin/bash", "-c", polyfillOptions.command];
-      const code = await exec.exec(prefixedCommand[0], [prefixedCommand[1], prefixedCommand[2]], {
-        ...createStreams()
-      });
-      if (polyfillOptions.path) {
-        const escapedPath = polyfillOptions.path.replaceAll('"', '\\"');
-        await exec.exec("/bin/bash", ["-c", `echo "${escapedPath}" >> $GITHUB_PATH`], {
+      const installCommandPolyfill = async () => {
+        core3.info(`Installing ${polyfill} polyfill...`);
+        const prefixedCommand = ["/bin/bash", "-c", polyfillOptions.command];
+        const code = await exec.exec(prefixedCommand[0], [prefixedCommand[1], prefixedCommand[2]], {
           ...createStreams()
         });
-        core3.info(`Added ${polyfill} polyfill to PATH.`);
+        if (polyfillOptions.path) {
+          const escapedPath = polyfillOptions.path.replaceAll('"', '\\"');
+          await exec.exec("/bin/bash", ["-c", `echo "${escapedPath}" >> $GITHUB_PATH`], {
+            ...createStreams()
+          });
+          core3.info(`Added ${polyfill} polyfill to PATH.`);
+        }
+        if (code !== 0) {
+          throw new Error(`Polyfill ${polyfill} failed with exit code ${code}.`);
+        }
+        core3.info(`Successfully installed ${polyfill} polyfill.`);
+      };
+      if (RUN_IN_BAND) {
+        await installCommandPolyfill();
+      } else {
+        promises.push(installCommandPolyfill());
       }
-      if (code !== 0) {
-        throw new Error(`Polyfill ${polyfill} failed with exit code ${code}.`);
-      }
-      core3.info(`Successfully installed ${polyfill} polyfill.`);
     }
+    if (!RUN_IN_BAND) {
+      await Promise.all(promises);
+    }
+    core3.info("Cleaning up...");
     await exec.exec("sudo", ["apt-get", "autoremove", "-y"], {
       ...createStreams()
     });
+    core3.info("Successfully cleaned up.");
     core3.info("Successfully installed all polyfills.");
   } catch (error2) {
     core3.debug(String(error2));

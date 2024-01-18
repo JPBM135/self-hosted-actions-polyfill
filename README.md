@@ -42,7 +42,7 @@ Run the installs in band, useful for debugging but will be slower.
 ## Usage
 
 ```yaml
-- uses: JPBM135/self-hosted-action-polyfill@v1.0.32
+- uses: JPBM135/self-hosted-action-polyfill@v1.0.33
   with:
     # List of modules and binaries to ignore.
     ignore: ['libssl-dev', 'wget']
