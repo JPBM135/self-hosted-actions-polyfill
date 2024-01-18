@@ -1,5 +1,5 @@
 name: 'Self Hosted Action Polyfill'
-description: 'Loads modules and binaries that are not available in the GitHub Actions self-hosted runner environment but are available in the GitHub Actions cloud environment.'
+description: 'Loads packages and libs that should be available in all hosted actions but aren`t in self-hosted'
 
 input:
   ignore:
@@ -20,6 +20,12 @@ input:
 
   skip-defaults:
     description: 'Ignore the default modules and binaries, only include the ones specified in the include input'
+    required: false
+    default: false
+    type: boolean
+
+  run-in-band:
+    description: 'Run the installs in band, useful for debugging but will be slower'
     required: false
     default: false
     type: boolean
