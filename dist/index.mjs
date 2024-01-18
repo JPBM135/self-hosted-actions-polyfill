@@ -16683,7 +16683,7 @@ var require_frame = __commonJS({
 var require_receiver = __commonJS({
   "node_modules/undici/lib/websocket/receiver.js"(exports, module) {
     "use strict";
-    var { Writable } = __require("stream");
+    var { Writable: Writable2 } = __require("stream");
     var diagnosticsChannel = __require("diagnostics_channel");
     var { parserStates, opcodes, states, emptyBuffer } = require_constants4();
     var { kReadyState, kSentClose, kResponse, kReceivedClose } = require_symbols5();
@@ -16692,7 +16692,7 @@ var require_receiver = __commonJS({
     var channels = {};
     channels.ping = diagnosticsChannel.channel("undici:websocket:ping");
     channels.pong = diagnosticsChannel.channel("undici:websocket:pong");
-    var ByteParser = class extends Writable {
+    var ByteParser = class extends Writable2 {
       #buffers = [];
       #byteOffset = 0;
       #state = parserStates.INFO;
@@ -19899,16 +19899,29 @@ var exec = __toESM(require_exec(), 1);
 import os from "node:os";
 import process2 from "node:process";
 
-// src/constants.ts
+// src/utils/createStreams.ts
 var core = __toESM(require_core(), 1);
-var DEFAULT_EXEC_LISTENERS = {
-  stdout: (data) => {
-    core.debug(data.toString());
-  },
-  stderr: (data) => {
-    core.error(data.toString());
-  }
-};
+import { Writable } from "node:stream";
+function createStreams() {
+  const stdout = new Writable({
+    write(chunk, __, callback) {
+      core.debug(chunk.toString());
+      callback();
+    }
+  });
+  const stderr = new Writable({
+    write(chunk, __, callback) {
+      core.error(chunk.toString());
+      callback();
+    }
+  });
+  return { outStream: stdout, errStream: stderr };
+}
+
+// src/utils/parseModulesToInstall.ts
+var core2 = __toESM(require_core(), 1);
+
+// src/constants.ts
 var POLYFILLS = {
   "ant-optional": { default: false, needs: [], aptPackage: "ant-optional" },
   "build-essential": { default: true, needs: [], aptPackage: "build-essential" },
@@ -19921,16 +19934,16 @@ var POLYFILLS = {
   "libgbm-dev": { default: true, needs: [], aptPackage: "libgbm-dev" },
   "libgconf-2-4": { default: true, needs: [], aptPackage: "libgconf-2-4" },
   "libgsl-dev": { default: true, needs: [], aptPackage: "libgsl-dev" },
-  "libmagic-dev": { default: true, needs: [], aptPackage: "libmagic-dev" },
-  "libmagickcore-dev": { default: true, needs: [], aptPackage: "libmagickcore-dev" },
-  "libmagickwand-dev": { default: true, needs: [], aptPackage: "libmagickwand-dev" },
-  "libsecret-1-dev": { default: true, needs: [], aptPackage: "libsecret-1-dev" },
-  "libsqlite3-dev": { default: true, needs: [], aptPackage: "libsqlite3-dev" },
+  "libmagic-dev": { default: false, needs: [], aptPackage: "libmagic-dev" },
+  "libmagickcore-dev": { default: false, needs: [], aptPackage: "libmagickcore-dev" },
+  "libmagickwand-dev": { default: false, needs: [], aptPackage: "libmagickwand-dev" },
+  "libpq-dev": { default: false, needs: [], aptPackage: "libpq-dev" },
+  "libsecret-1-dev": { default: false, needs: [], aptPackage: "libsecret-1-dev" },
+  "libsqlite3-dev": { default: false, needs: [], aptPackage: "libsqlite3-dev" },
   "libssl-dev": { default: true, needs: [], aptPackage: "libssl-dev" },
   "libxkbfile-dev": { default: true, needs: [], aptPackage: "libxkbfile-dev" },
   "libyaml-dev": { default: true, needs: [], aptPackage: "libyaml-dev" },
   "net-tools": { default: false, needs: [], aptPackage: "net-tools" },
-  'openjdk-17-jre-headless"': { default: false, needs: [], aptPackage: 'openjdk-17-jre-headless"' },
   "openssh-client": { default: false, needs: [], aptPackage: "openssh-client" },
   "p7zip-full": { default: false, needs: [], aptPackage: "p7zip-full" },
   "p7zip-rar": { default: false, needs: [], aptPackage: "p7zip-rar" },
@@ -19966,7 +19979,6 @@ var POLYFILLS = {
   iproute2: { default: false, needs: [], aptPackage: "iproute2" },
   jq: { default: true, needs: [], aptPackage: "jq" },
   kmod: { default: false, needs: [], aptPackage: "kmod" },
-  lib32z1: { default: true, needs: [], aptPackage: "lib32z1" },
   libcurl4: { default: true, needs: [], aptPackage: "libcurl4" },
   libtool: { default: true, needs: [], aptPackage: "libtool" },
   libunwind8: { default: true, needs: [], aptPackage: "libunwind8" },
@@ -20018,7 +20030,6 @@ var POLYFILLS = {
 };
 
 // src/utils/parseModulesToInstall.ts
-var core2 = __toESM(require_core(), 1);
 function parseModulesToInstall({
   ignore,
   include,
@@ -20119,7 +20130,7 @@ async function main() {
     validateInputs({ ignore: IGNORE, include: INCLUDES, skipDefaults: SKIP_DEFAULTS });
     core3.debug("Installing dependencies...");
     const updateCode = await exec.exec("sudo", ["apt-get", "update", "-y"], {
-      listeners: DEFAULT_EXEC_LISTENERS
+      ...createStreams()
     });
     if (updateCode !== 0) {
       throw new Error(`Apt update failed with exit code ${updateCode}.`);
@@ -20139,7 +20150,7 @@ async function main() {
           ...aptModulesToInstall.map(([, polyfill]) => polyfill.aptPackage)
         ],
         {
-          listeners: DEFAULT_EXEC_LISTENERS
+          ...createStreams()
         }
       );
       if (code !== 0) {
@@ -20152,7 +20163,7 @@ async function main() {
       core3.info(`Installing ${polyfill} polyfill...`);
       const prefixedCommand = ["/bin/bash", "-c", polyfillOptions.command];
       const code = await exec.exec(prefixedCommand[0], [prefixedCommand[1], prefixedCommand[2]], {
-        listeners: DEFAULT_EXEC_LISTENERS
+        ...createStreams()
       });
       if (polyfillOptions.path) {
         core3.addPath(polyfillOptions.path);
@@ -20164,7 +20175,7 @@ async function main() {
       core3.info(`Successfully installed ${polyfill} polyfill.`);
     }
     await exec.exec("sudo", ["apt-get", "autoremove", "-y"], {
-      listeners: DEFAULT_EXEC_LISTENERS
+      ...createStreams()
     });
     core3.info("Successfully installed all polyfills.");
   } catch (error2) {
